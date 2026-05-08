@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="GrantHood\Component\DownloadTracker\Administrator\Field">
+	<fields name="filter">
+		<field name="product_id" type="product" label="COM_DOWNLOADTRACKER_FIELD_PRODUCT_LABEL" onchange="this.form.submit();">
+			<option value="">COM_DOWNLOADTRACKER_SELECT_PRODUCT</option>
+		</field>
+		<field name="item_id" type="item" label="COM_DOWNLOADTRACKER_FIELD_ITEM_LABEL" onchange="this.form.submit();">
+			<option value="">COM_DOWNLOADTRACKER_SELECT_ITEM</option>
+		</field>
+		<field name="edition" type="text" label="COM_DOWNLOADTRACKER_FIELD_EDITION_LABEL" onchange="this.form.submit();" />
+		<field name="version" type="text" label="COM_DOWNLOADTRACKER_FIELD_VERSION_LABEL" onchange="this.form.submit();" />
+		<field name="date_from" type="calendar" label="COM_DOWNLOADTRACKER_FIELD_DATE_FROM_LABEL" format="%Y-%m-%d" filter="user_utc" showtime="false" onchange="this.form.submit();" />
+		<field name="date_to" type="calendar" label="COM_DOWNLOADTRACKER_FIELD_DATE_TO_LABEL" format="%Y-%m-%d" filter="user_utc" showtime="false" onchange="this.form.submit();" />
+	</fields>
+	<fields name="list">
+		<field name="fullordering" type="list" label="JGLOBAL_SORT_BY" onchange="this.form.submit();" default="a.downloaded_at DESC" validate="options">
+			<option value="">JGLOBAL_SORT_BY</option>
+			<option value="a.downloaded_at ASC">COM_DOWNLOADTRACKER_DOWNLOADED_AT_ASC</option>
+			<option value="a.downloaded_at DESC">COM_DOWNLOADTRACKER_DOWNLOADED_AT_DESC</option>
+			<option value="i.title ASC">COM_DOWNLOADTRACKER_ITEM_ASC</option>
+			<option value="i.title DESC">COM_DOWNLOADTRACKER_ITEM_DESC</option>
+			<option value="p.title ASC">COM_DOWNLOADTRACKER_PRODUCT_ASC</option>
+			<option value="p.title DESC">COM_DOWNLOADTRACKER_PRODUCT_DESC</option>
+		</field>
+		<field name="limit" type="limitbox" label="JGLOBAL_LIST_LIMIT" default="25" onchange="this.form.submit();" />
+	</fields>
+</form>

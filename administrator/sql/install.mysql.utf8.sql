@@ -1,0 +1,61 @@
+CREATE TABLE IF NOT EXISTS `#__downloadtracker_products` (
+	`id` int NOT NULL AUTO_INCREMENT,
+	`title` varchar(255) NOT NULL,
+	`alias` varchar(255) NOT NULL,
+	`description` text NULL,
+	`state` tinyint NOT NULL DEFAULT 1,
+	`created` datetime NULL,
+	`created_by` int unsigned NOT NULL DEFAULT 0,
+	`modified` datetime NULL,
+	`modified_by` int unsigned NOT NULL DEFAULT 0,
+	`ordering` int NOT NULL DEFAULT 0,
+	`checked_out` int unsigned NULL,
+	`checked_out_time` datetime NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `idx_alias` (`alias`),
+	KEY `idx_state` (`state`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__downloadtracker_items` (
+	`id` int NOT NULL AUTO_INCREMENT,
+	`product_id` int NOT NULL,
+	`title` varchar(255) NOT NULL,
+	`alias` varchar(255) NOT NULL,
+	`edition` varchar(50) NULL,
+	`version` varchar(50) NULL,
+	`target_url` text NOT NULL,
+	`is_latest` tinyint NOT NULL DEFAULT 0,
+	`state` tinyint NOT NULL DEFAULT 1,
+	`notes` text NULL,
+	`created` datetime NULL,
+	`created_by` int unsigned NOT NULL DEFAULT 0,
+	`modified` datetime NULL,
+	`modified_by` int unsigned NOT NULL DEFAULT 0,
+	`ordering` int NOT NULL DEFAULT 0,
+	`checked_out` int unsigned NULL,
+	`checked_out_time` datetime NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `idx_alias` (`alias`),
+	KEY `idx_product_id` (`product_id`),
+	KEY `idx_state` (`state`),
+	KEY `idx_latest` (`is_latest`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
+	`id` bigint NOT NULL AUTO_INCREMENT,
+	`item_id` int NOT NULL,
+	`product_id` int NOT NULL,
+	`downloaded_at` datetime NOT NULL,
+	`edition` varchar(50) NULL,
+	`version` varchar(50) NULL,
+	`ip_address` varchar(45) NULL,
+	`user_agent` text NULL,
+	`referrer` text NULL,
+	`target_url` text NOT NULL,
+	`status` varchar(20) NOT NULL DEFAULT 'redirected',
+	PRIMARY KEY (`id`),
+	KEY `idx_item_id` (`item_id`),
+	KEY `idx_product_id` (`product_id`),
+	KEY `idx_downloaded_at` (`downloaded_at`),
+	KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;

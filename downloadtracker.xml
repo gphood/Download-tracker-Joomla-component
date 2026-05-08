@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="4.0" method="upgrade">
+	<name>COM_DOWNLOADTRACKER</name>
+	<author>Grant Hood</author>
+	<creationDate>2026-05-08</creationDate>
+	<copyright>(C) 2026 Grant Hood. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>0.1.0</version>
+	<description>COM_DOWNLOADTRACKER_XML_DESCRIPTION</description>
+	<namespace path="src">GrantHood\Component\DownloadTracker</namespace>
+
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+		</sql>
+	</install>
+
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+		</sql>
+	</uninstall>
+
+	<files folder="site">
+		<folder>language</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>
+	</files>
+
+	<languages folder="site/language">
+		<language tag="en-GB">en-GB/com_downloadtracker.ini</language>
+		<language tag="en-GB">en-GB/com_downloadtracker.sys.ini</language>
+	</languages>
+
+	<media destination="com_downloadtracker" folder="media">
+		<folder>css</folder>
+	</media>
+
+	<administration>
+		<menu img="class:download">COM_DOWNLOADTRACKER</menu>
+		<submenu>
+			<menu link="option=com_downloadtracker&amp;view=products" view="products" img="class:folder">
+				COM_DOWNLOADTRACKER_PRODUCTS
+			</menu>
+			<menu link="option=com_downloadtracker&amp;view=items" view="items" img="class:download">
+				COM_DOWNLOADTRACKER_ITEMS
+			</menu>
+			<menu link="option=com_downloadtracker&amp;view=logs" view="logs" img="class:list">
+				COM_DOWNLOADTRACKER_LOGS
+			</menu>
+		</submenu>
+		<files folder="administrator">
+			<filename>access.xml</filename>
+			<folder>forms</folder>
+			<folder>language</folder>
+			<folder>services</folder>
+			<folder>sql</folder>
+			<folder>src</folder>
+			<folder>tmpl</folder>
+		</files>
+		<languages folder="administrator/language">
+			<language tag="en-GB">en-GB/com_downloadtracker.ini</language>
+			<language tag="en-GB">en-GB/com_downloadtracker.sys.ini</language>
+		</languages>
+	</administration>
+</extension>
