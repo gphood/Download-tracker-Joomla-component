@@ -26,7 +26,8 @@ class LogsModel extends ListModel
 				'id', 'a.id', 'downloaded_at', 'a.downloaded_at', 'item_title', 'i.title',
 				'product_title', 'p.title', 'edition', 'a.edition', 'version', 'a.version',
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
-				'ip_address', 'a.ip_address', 'status', 'a.status',
+				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
+				'status', 'a.status',
 			];
 		}
 
@@ -36,10 +37,12 @@ class LogsModel extends ListModel
 	protected function populateState($ordering = 'a.downloaded_at', $direction = 'desc'): void
 	{
 		$app = Factory::getApplication();
+		$this->setState('filter.search', $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
 		$this->setState('filter.product_id', $app->getUserStateFromRequest($this->context . '.filter.product_id', 'filter_product_id', '', 'string'));
 		$this->setState('filter.item_id', $app->getUserStateFromRequest($this->context . '.filter.item_id', 'filter_item_id', '', 'string'));
 		$this->setState('filter.edition', $app->getUserStateFromRequest($this->context . '.filter.edition', 'filter_edition', '', 'string'));
 		$this->setState('filter.version', $app->getUserStateFromRequest($this->context . '.filter.version', 'filter_version', '', 'string'));
+		$this->setState('filter.status', $app->getUserStateFromRequest($this->context . '.filter.status', 'filter_status', '', 'string'));
 		$this->setState('filter.date_from', $app->getUserStateFromRequest($this->context . '.filter.date_from', 'filter_date_from', '', 'string'));
 		$this->setState('filter.date_to', $app->getUserStateFromRequest($this->context . '.filter.date_to', 'filter_date_to', '', 'string'));
 
@@ -50,12 +53,30 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.status']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.user_agent', 'a.status']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
 			->leftJoin($db->quoteName('#__downloadtracker_items', 'i') . ' ON ' . $db->quoteName('i.id') . ' = ' . $db->quoteName('a.item_id'))
 			->leftJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('a.product_id'));
+
+		$search = trim((string) $this->getState('filter.search'));
+
+		if ($search !== '') {
+			$search = '%' . str_replace(' ', '%', $search) . '%';
+			$query->where(
+				'('
+				. $db->quoteName('a.requested_alias') . ' LIKE :search_alias'
+				. ' OR ' . $db->quoteName('a.ip_address') . ' LIKE :search_ip'
+				. ' OR ' . $db->quoteName('a.referrer') . ' LIKE :search_referrer'
+				. ' OR ' . $db->quoteName('a.user_agent') . ' LIKE :search_user_agent'
+				. ')'
+			)
+				->bind(':search_alias', $search)
+				->bind(':search_ip', $search)
+				->bind(':search_referrer', $search)
+				->bind(':search_user_agent', $search);
+		}
 
 		foreach (['product_id', 'item_id'] as $field) {
 			$value = $this->getState('filter.' . $field);
@@ -73,6 +94,12 @@ class LogsModel extends ListModel
 				$value = '%' . str_replace(' ', '%', $value) . '%';
 				$query->where($db->quoteName('a.' . $field) . ' LIKE :' . $field)->bind(':' . $field, $value);
 			}
+		}
+
+		$status = trim((string) $this->getState('filter.status'));
+
+		if ($status !== '') {
+			$query->where($db->quoteName('a.status') . ' = :status')->bind(':status', $status);
 		}
 
 		$dateFrom = trim((string) $this->getState('filter.date_from'));
