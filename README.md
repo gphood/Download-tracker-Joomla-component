@@ -12,7 +12,7 @@ Reusable Joomla 5/6 component for tracking extension and product download reques
 
 ## Install
 
-Install `com_downloadtracker-0.1.0.zip` through Joomla Administrator:
+Install `com_downloadtracker-0.1.1.zip` through Joomla Administrator:
 
 ```text
 System -> Install -> Extensions

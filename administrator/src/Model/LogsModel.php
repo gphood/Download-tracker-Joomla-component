@@ -25,6 +25,7 @@ class LogsModel extends ListModel
 			$config['filter_fields'] = [
 				'id', 'a.id', 'downloaded_at', 'a.downloaded_at', 'item_title', 'i.title',
 				'product_title', 'p.title', 'edition', 'a.edition', 'version', 'a.version',
+				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'status', 'a.status',
 			];
 		}
@@ -49,7 +50,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.edition', 'a.version', 'a.ip_address', 'a.referrer', 'a.status']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.status']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))

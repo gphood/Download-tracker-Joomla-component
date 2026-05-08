@@ -36,7 +36,7 @@ class DownloadModel extends BaseDatabaseModel
 		return $item ?: null;
 	}
 
-	public function logDownload(object $item): void
+	public function logDownload(object $item, string $requestedAlias): void
 	{
 		$app = Factory::getApplication();
 		$server = $app->getInput()->server;
@@ -46,8 +46,10 @@ class DownloadModel extends BaseDatabaseModel
 			'item_id' => (int) $item->id,
 			'product_id' => (int) $item->product_id,
 			'downloaded_at' => Factory::getDate()->toSql(),
+			'requested_alias' => $requestedAlias,
 			'edition' => $item->edition,
 			'version' => $item->version,
+			'resolved_version' => $item->version,
 			'ip_address' => $server->getString('REMOTE_ADDR', ''),
 			'user_agent' => $server->getString('HTTP_USER_AGENT', ''),
 			'referrer' => $server->getString('HTTP_REFERER', ''),

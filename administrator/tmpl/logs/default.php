@@ -29,10 +29,12 @@ $hasActiveFilters = !empty($this->activeFilters);
 			<thead>
 				<tr>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_DOWNLOADED_AT', 'a.downloaded_at', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_REQUESTED_ALIAS', 'a.requested_alias', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_ITEM', 'i.title', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_PRODUCT', 'p.title', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EDITION', 'a.edition', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_VERSION', 'a.version', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_RESOLVED_VERSION', 'a.resolved_version', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IP_ADDRESS', 'a.ip_address', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REFERRER'); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_STATUS', 'a.status', $listDirn, $listOrder); ?></th>
@@ -42,10 +44,12 @@ $hasActiveFilters = !empty($this->activeFilters);
 				<?php foreach ($this->items as $item) : ?>
 					<tr>
 						<td><?php echo HTMLHelper::_('date', $item->downloaded_at, Text::_('DATE_FORMAT_LC4')); ?></td>
+						<td><?php echo $this->escape((string) $item->requested_alias); ?></td>
 						<td><?php echo $this->escape((string) $item->item_title); ?></td>
 						<td><?php echo $this->escape((string) $item->product_title); ?></td>
 						<td><?php echo $this->escape((string) $item->edition); ?></td>
 						<td><?php echo $this->escape((string) $item->version); ?></td>
+						<td><?php echo $this->escape((string) $item->resolved_version); ?></td>
 						<td><?php echo $this->escape((string) $item->ip_address); ?></td>
 						<td class="com-downloadtracker-target-url"><?php echo $this->escape((string) $item->referrer); ?></td>
 						<td><?php echo $this->escape((string) $item->status); ?></td>

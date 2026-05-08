@@ -35,7 +35,7 @@ class DownloadController extends BaseController
 			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_FOUND'));
 		}
 
-		$model->logDownload($item);
+		$model->logDownload($item, $alias);
 
 		$this->app->redirect((string) $item->target_url, 302);
 	}
