@@ -36,6 +36,7 @@ $hasActiveFilters = !empty($this->activeFilters);
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_VERSION', 'a.version', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_RESOLVED_VERSION', 'a.resolved_version', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IP_ADDRESS', 'a.ip_address', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IS_BOT', 'a.is_bot', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REFERRER'); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_STATUS', 'a.status', $listDirn, $listOrder); ?></th>
 				</tr>
@@ -51,6 +52,7 @@ $hasActiveFilters = !empty($this->activeFilters);
 						<td><?php echo $this->escape((string) $item->version); ?></td>
 						<td><?php echo $this->escape((string) $item->resolved_version); ?></td>
 						<td><?php echo $this->escape((string) $item->ip_address); ?></td>
+						<td><?php echo ((int) $item->is_bot === 1) ? Text::_('JYES') : Text::_('JNO'); ?></td>
 						<td class="com-downloadtracker-target-url"><?php echo $this->escape((string) $item->referrer); ?></td>
 						<td><?php echo $this->escape((string) $item->status); ?></td>
 					</tr>

@@ -13,10 +13,11 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 
 $summaryCards = [
-	'total' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_TOTAL_DOWNLOADS'),
+	'total' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_HUMAN_DOWNLOADS'),
 	'today' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_DOWNLOADS_TODAY'),
 	'last7' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_DOWNLOADS_LAST_7_DAYS'),
 	'last30' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_DOWNLOADS_LAST_30_DAYS'),
+	'raw_total' => Text::_('COM_DOWNLOADTRACKER_DASHBOARD_RAW_TOTAL_DOWNLOADS'),
 ];
 ?>
 <div class="com-downloadtracker-dashboard">

@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`resolved_version` varchar(50) NULL,
 	`ip_address` varchar(45) NULL,
 	`user_agent` text NULL,
+	`is_bot` tinyint NOT NULL DEFAULT 0,
 	`referrer` text NULL,
 	`target_url` text NOT NULL,
 	`status` varchar(20) NOT NULL DEFAULT 'redirected',
@@ -59,5 +60,6 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	KEY `idx_item_id` (`item_id`),
 	KEY `idx_product_id` (`product_id`),
 	KEY `idx_downloaded_at` (`downloaded_at`),
+	KEY `idx_is_bot` (`is_bot`),
 	KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;

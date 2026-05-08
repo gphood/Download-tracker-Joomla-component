@@ -41,6 +41,7 @@ class DownloadModel extends BaseDatabaseModel
 		$app = Factory::getApplication();
 		$server = $app->getInput()->server;
 		$db = $this->getDatabase();
+		$userAgent = $server->getString('HTTP_USER_AGENT', '');
 
 		$log = (object) [
 			'item_id' => (int) $item->id,
@@ -51,12 +52,24 @@ class DownloadModel extends BaseDatabaseModel
 			'version' => $item->version,
 			'resolved_version' => $item->version,
 			'ip_address' => $server->getString('REMOTE_ADDR', ''),
-			'user_agent' => $server->getString('HTTP_USER_AGENT', ''),
+			'user_agent' => $userAgent,
+			'is_bot' => $this->isBotUserAgent($userAgent) ? 1 : 0,
 			'referrer' => $server->getString('HTTP_REFERER', ''),
 			'target_url' => (string) $item->target_url,
 			'status' => 'redirected',
 		];
 
 		$db->insertObject('#__downloadtracker_logs', $log);
+	}
+
+	private function isBotUserAgent(string $userAgent): bool
+	{
+		foreach (['bot', 'crawl', 'spider', 'slurp', 'facebookexternalhit', 'preview', 'headless', 'lighthouse'] as $term) {
+			if (stripos($userAgent, $term) !== false) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -21,10 +21,11 @@ class DashboardModel extends BaseDatabaseModel
 	public function getSummary(): array
 	{
 		return [
-			'total' => $this->getDownloadCount(),
-			'today' => $this->getDownloadCount(Factory::getDate('today')->toSql()),
-			'last7' => $this->getDownloadCount(Factory::getDate('-7 days')->toSql()),
-			'last30' => $this->getDownloadCount(Factory::getDate('-30 days')->toSql()),
+			'total' => $this->getDownloadCount(null, false),
+			'today' => $this->getDownloadCount(Factory::getDate('today')->toSql(), false),
+			'last7' => $this->getDownloadCount(Factory::getDate('-7 days')->toSql(), false),
+			'last30' => $this->getDownloadCount(Factory::getDate('-30 days')->toSql(), false),
+			'raw_total' => $this->getDownloadCount(),
 		];
 	}
 
@@ -39,6 +40,7 @@ class DashboardModel extends BaseDatabaseModel
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
 			->leftJoin($db->quoteName('#__downloadtracker_items', 'i') . ' ON ' . $db->quoteName('i.id') . ' = ' . $db->quoteName('a.item_id'))
 			->leftJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('a.product_id'))
+			->where($db->quoteName('a.is_bot') . ' = 0')
 			->group($db->quoteName(['a.item_id', 'i.title', 'p.title']))
 			->order($db->quoteName('download_count') . ' DESC');
 
@@ -64,12 +66,16 @@ class DashboardModel extends BaseDatabaseModel
 		return $db->loadObjectList();
 	}
 
-	private function getDownloadCount(?string $fromDate = null): int
+	private function getDownloadCount(?string $fromDate = null, bool $includeBots = true): int
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
 			->select('COUNT(*)')
 			->from($db->quoteName('#__downloadtracker_logs'));
+
+		if (!$includeBots) {
+			$query->where($db->quoteName('is_bot') . ' = 0');
+		}
 
 		if ($fromDate !== null) {
 			$query->where($db->quoteName('downloaded_at') . ' >= :from_date')
