@@ -5,7 +5,7 @@
 	<creationDate>2026-05-08</creationDate>
 	<copyright>(C) 2026 Grant Hood. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>0.1.3</version>
+	<version>0.1.4</version>
 	<description>COM_DOWNLOADTRACKER_XML_DESCRIPTION</description>
 	<namespace path="src">GrantHood\Component\DownloadTracker</namespace>
 
@@ -45,6 +45,9 @@
 	<administration>
 		<menu img="class:download">COM_DOWNLOADTRACKER</menu>
 		<submenu>
+			<menu link="option=com_downloadtracker&amp;view=dashboard" view="dashboard" img="class:dashboard">
+				COM_DOWNLOADTRACKER_DASHBOARD
+			</menu>
 			<menu link="option=com_downloadtracker&amp;view=products" view="products" img="class:folder">
 				COM_DOWNLOADTRACKER_PRODUCTS
 			</menu>
