@@ -8,11 +8,12 @@ Reusable Joomla 5/6 component for tracking extension and product download reques
 - Manage downloadable items with aliases, editions, versions, and external target URLs.
 - Log each download request before redirecting.
 - Read-only administrator log view.
+- SEF-friendly `/download/{alias}` frontend route when a matching Joomla menu item exists.
 - Joomla MVC structure with administrator and site applications.
 
 ## Install
 
-Install `com_downloadtracker-0.1.6.zip` through Joomla Administrator:
+Install `com_downloadtracker-0.1.7.zip` through Joomla Administrator:
 
 ```text
 System -> Install -> Extensions
@@ -38,7 +39,7 @@ Do not edit `administrator/downloadtracker.xml` directly.
 
 ## Test URL
 
-Use the item's alias with:
+The non-SEF fallback URL remains available:
 
 ```text
 /index.php?option=com_downloadtracker&task=download.redirect&alias=your-download-alias
@@ -50,6 +51,20 @@ Example:
 /index.php?option=com_downloadtracker&task=download.redirect&alias=decision-tree-free-latest
 ```
 
+For the preferred clean URL:
+
+```text
+/download/decision-tree-free-latest
+```
+
+create a Joomla menu item with these settings:
+
+- Menu item type: `Download Tracker -> Download Tracker Route`
+- Menu title: `Download`
+- Alias: `download`
+- Status: `Published`
+- Menu: a hidden menu is recommended
+
 When requested, the component looks up the published item, confirms the parent product is published, records a log entry, and sends a 302 redirect to the configured target URL.
 
 ## Database Tables
@@ -60,6 +75,6 @@ When requested, the component looks up the published item, confirms the parent p
 
 ## Known Limitations
 
-The first version uses the reliable Joomla task URL shown above. A cleaner `/download/{alias}` route can be added later with a custom router or menu alias setup.
+The `/download/{alias}` route needs a published Joomla menu item with the alias `download`. Without that menu item, use the non-SEF fallback URL shown above.
 
-CSV export, update-server integration, ecommerce, licence keys, subscriptions, GitHub API syncing, charts, and bot filtering are intentionally out of scope for the first build.
+Update-server integration, ecommerce, licence keys, subscriptions, GitHub API syncing, charts, and bot filtering rules are intentionally out of scope for this build.

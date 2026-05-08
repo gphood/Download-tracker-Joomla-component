@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 use Joomla\CMS\Dispatcher\ComponentDispatcherFactoryInterface;
 use Joomla\CMS\Extension\ComponentInterface;
-use Joomla\CMS\Extension\MVCComponent;
 use Joomla\CMS\Extension\Service\Provider\ComponentDispatcherFactory;
 use Joomla\CMS\Extension\Service\Provider\MVCFactory;
+use Joomla\CMS\Extension\Service\Provider\RouterFactory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\CMS\Component\Router\RouterFactoryInterface;
+use GrantHood\Component\DownloadTracker\Administrator\Extension\DownloadTrackerComponent;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 
@@ -25,12 +27,14 @@ return new class () implements ServiceProviderInterface {
 	{
 		$container->registerServiceProvider(new MVCFactory('\\GrantHood\\Component\\DownloadTracker'));
 		$container->registerServiceProvider(new ComponentDispatcherFactory('\\GrantHood\\Component\\DownloadTracker'));
+		$container->registerServiceProvider(new RouterFactory('\\GrantHood\\Component\\DownloadTracker'));
 
 		$container->set(
 			ComponentInterface::class,
 			static function (Container $container): ComponentInterface {
-				$component = new MVCComponent($container->get(ComponentDispatcherFactoryInterface::class));
+				$component = new DownloadTrackerComponent($container->get(ComponentDispatcherFactoryInterface::class));
 				$component->setMVCFactory($container->get(MVCFactoryInterface::class));
+				$component->setRouterFactory($container->get(RouterFactoryInterface::class));
 
 				return $component;
 			}
