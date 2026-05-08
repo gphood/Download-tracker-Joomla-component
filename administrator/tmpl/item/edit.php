@@ -15,7 +15,7 @@ use Joomla\CMS\Router\Route;
 HTMLHelper::_('behavior.formvalidator');
 HTMLHelper::_('behavior.keepalive');
 ?>
-<form action="<?php echo Route::_('index.php?option=com_downloadtracker&layout=edit&id=' . (int) $this->item->id); ?>" method="post" name="adminForm" id="item-form" class="form-validate">
+<form action="<?php echo Route::_('index.php?option=com_downloadtracker&view=item&layout=edit&id=' . (int) $this->item->id); ?>" method="post" name="adminForm" id="item-form" class="form-validate">
 	<div class="row">
 		<div class="col-lg-9">
 			<?php echo $this->form->renderFieldset('details'); ?>
