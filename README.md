@@ -13,7 +13,7 @@ Reusable Joomla 5/6 component for tracking extension and product download reques
 
 ## Install
 
-Install `com_downloadtracker-0.1.7.zip` through Joomla Administrator:
+Install `com_downloadtracker-0.1.8.zip` through Joomla Administrator:
 
 ```text
 System -> Install -> Extensions
@@ -59,11 +59,12 @@ For the preferred clean URL:
 
 create a Joomla menu item with these settings:
 
-- Menu item type: `Download Tracker -> Download Tracker Route`
+- Create or use a hidden menu.
+- Menu item type: `Download Tracker -> Download Redirect`
 - Menu title: `Download`
 - Alias: `download`
 - Status: `Published`
-- Menu: a hidden menu is recommended
+- Menu: the hidden menu
 
 When requested, the component looks up the published item, confirms the parent product is published, records a log entry, and sends a 302 redirect to the configured target URL.
 
