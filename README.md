@@ -13,7 +13,7 @@ Reusable Joomla 5/6 component for tracking extension and product download reques
 
 ## Install
 
-Install `com_downloadtracker-0.1.9.zip` through Joomla Administrator:
+Install `com_downloadtracker-0.1.10.zip` through Joomla Administrator:
 
 ```text
 System -> Install -> Extensions
@@ -65,6 +65,8 @@ create a Joomla menu item with these settings:
 - Alias: `download`
 - Status: `Published`
 - Menu: the hidden menu
+
+No child menu items are needed. The component router is registered through `administrator/services/provider.php` using Joomla's `RouterFactory`; the component extension implements `RouterServiceInterface`, and the site router lives at `site/src/Service/Router.php`.
 
 When requested, the component looks up the published item, confirms the parent product is published, records a log entry, and sends a 302 redirect to the configured target URL.
 

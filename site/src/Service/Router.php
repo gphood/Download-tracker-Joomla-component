@@ -14,9 +14,32 @@ namespace GrantHood\Component\DownloadTracker\Site\Service;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Component\Router\RouterBase;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Exception\RouteNotFoundException;
 
 class Router extends RouterBase
 {
+	public function preprocess($query): array
+	{
+		if (
+			($query['option'] ?? '') === 'com_downloadtracker'
+			&& ($query['task'] ?? '') === 'download.redirect'
+			&& !empty($query['alias'])
+			&& empty($query['Itemid'])
+		) {
+			$menuItems = $this->menu->getItems('component', 'com_downloadtracker');
+
+			foreach ($menuItems as $menuItem) {
+				if (($menuItem->query['view'] ?? '') === 'download' && $menuItem->alias === 'download') {
+					$query['Itemid'] = (int) $menuItem->id;
+					break;
+				}
+			}
+		}
+
+		return $query;
+	}
+
 	public function build(&$query): array
 	{
 		$segments = [];
@@ -34,11 +57,24 @@ class Router extends RouterBase
 	{
 		$vars = ['view' => 'download'];
 
-		if (count($segments) > 0) {
-			$vars['task'] = 'download.redirect';
-			$vars['alias'] = (string) array_shift($segments);
+		if (count($segments) === 0) {
+			return $vars;
 		}
 
-		return $vars;
+		if (count($segments) !== 1) {
+			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_FOUND'));
+		}
+
+		$alias = trim((string) array_shift($segments));
+
+		if ($alias === '') {
+			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_FOUND'));
+		}
+
+		return [
+			'view' => 'download',
+			'task' => 'download.redirect',
+			'alias' => $alias,
+		];
 	}
 }
