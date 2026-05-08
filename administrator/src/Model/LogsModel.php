@@ -27,7 +27,7 @@ class LogsModel extends ListModel
 				'product_title', 'p.title', 'edition', 'a.edition', 'version', 'a.version',
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
-				'is_bot', 'a.is_bot', 'status', 'a.status',
+				'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
 			];
 		}
 
@@ -53,7 +53,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.user_agent', 'a.is_bot', 'a.status']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
@@ -119,5 +119,15 @@ class LogsModel extends ListModel
 		$query->order($db->escape($orderCol . ' ' . $orderDirn));
 
 		return $query;
+	}
+
+	public function getExportItems(): array
+	{
+		$db = $this->getDatabase();
+		$query = $this->getListQuery();
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList();
 	}
 }

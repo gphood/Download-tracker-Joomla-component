@@ -35,6 +35,7 @@ class HtmlView extends BaseHtmlView
 		$this->activeFilters = $this->get('ActiveFilters');
 
 		ToolbarHelper::title(Text::_('COM_DOWNLOADTRACKER_MANAGER_LOGS'), 'list');
+		ToolbarHelper::custom('logs.exportCsv', 'download', '', 'COM_DOWNLOADTRACKER_EXPORT_CSV', false);
 
 		Factory::getApplication()->getDocument()->getWebAssetManager()
 			->registerAndUseStyle('com_downloadtracker.admin', 'media/com_downloadtracker/css/admin.css');
