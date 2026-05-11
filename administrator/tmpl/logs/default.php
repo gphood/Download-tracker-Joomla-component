@@ -77,18 +77,30 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 					$displayReferrer = $isDownloadRequestReferrer($referrer, $requestedUrl, $requestedAlias)
 						? Text::_('COM_DOWNLOADTRACKER_DIRECT_UNAVAILABLE')
 						: $referrer;
+					$classification = trim((string) $item->ip_classification);
+					$classificationLabels = [
+						'localhost' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_LOCALHOST'),
+						'private_network' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_PRIVATE_NETWORK'),
+						'docker_network' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_DOCKER_NETWORK'),
+						'reserved' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_RESERVED'),
+						'invalid' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_INVALID'),
+					];
 					$locationTitleParts = [];
 
-					foreach ([
-						'COM_DOWNLOADTRACKER_LOCATION_COUNTRY' => trim((string) $item->country_name),
-						'COM_DOWNLOADTRACKER_LOCATION_CONTINENT' => trim((string) $item->continent_name),
-						'COM_DOWNLOADTRACKER_LOCATION_ASN' => trim((string) $item->asn),
-						'COM_DOWNLOADTRACKER_LOCATION_ASN_NAME' => trim((string) $item->asn_name),
-						'COM_DOWNLOADTRACKER_LOCATION_PROVIDER' => trim((string) $item->ip_location_provider),
-						'COM_DOWNLOADTRACKER_LOCATION_CHECKED_AT' => trim((string) $item->ip_location_checked_at),
-					] as $label => $value) {
-						if ($value !== '') {
-							$locationTitleParts[] = Text::_($label) . ': ' . $value;
+					if (trim((string) $item->country_code) === '' && isset($classificationLabels[$classification])) {
+						$locationTitleParts[] = Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_NOT_PUBLIC_TOOLTIP');
+					} else {
+						foreach ([
+							'COM_DOWNLOADTRACKER_LOCATION_COUNTRY' => trim((string) $item->country_name),
+							'COM_DOWNLOADTRACKER_LOCATION_CONTINENT' => trim((string) $item->continent_name),
+							'COM_DOWNLOADTRACKER_LOCATION_ASN' => trim((string) $item->asn),
+							'COM_DOWNLOADTRACKER_LOCATION_ASN_NAME' => trim((string) $item->asn_name),
+							'COM_DOWNLOADTRACKER_LOCATION_PROVIDER' => trim((string) $item->ip_location_provider),
+							'COM_DOWNLOADTRACKER_LOCATION_CHECKED_AT' => trim((string) $item->ip_location_checked_at),
+						] as $label => $value) {
+							if ($value !== '') {
+								$locationTitleParts[] = Text::_($label) . ': ' . $value;
+							}
 						}
 					}
 
@@ -108,6 +120,8 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 								<?php echo $this->escape((string) $item->ip_address); ?>
 								<?php if (trim((string) $item->country_code) !== '') : ?>
 									<span class="badge bg-info text-dark ms-1"><?php echo $this->escape((string) $item->country_code); ?></span>
+								<?php elseif (isset($classificationLabels[$classification])) : ?>
+									<span class="badge bg-secondary ms-1"><?php echo $this->escape($classificationLabels[$classification]); ?></span>
 								<?php endif; ?>
 							</span>
 						</td>

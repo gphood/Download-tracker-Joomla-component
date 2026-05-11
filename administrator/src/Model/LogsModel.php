@@ -30,7 +30,7 @@ class LogsModel extends ListModel
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
 				'requested_url', 'a.requested_url', 'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
-				'country_code', 'a.country_code',
+				'country_code', 'a.country_code', 'ip_classification', 'a.ip_classification',
 			];
 		}
 
@@ -56,7 +56,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status', 'a.ip_classification']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
@@ -161,12 +161,14 @@ class LogsModel extends ListModel
 		foreach ($rows as $row) {
 			$ip = trim((string) $row->ip_address);
 			$checkedAt = Factory::getDate()->toSql();
+			$classification = $this->classifyIp($ip);
 
-			if ($ip === '' || $this->isPrivateOrReservedIp($ip)) {
+			if ($classification !== 'public') {
 				$this->updateLocation((int) $row->id, [
+					'ip_classification' => $classification,
 					'ip_location_provider' => 'ipinfo_lite',
 					'ip_location_checked_at' => $checkedAt,
-					'ip_location_status' => 'skipped_private_ip',
+					'ip_location_status' => 'skipped_' . $classification,
 				]);
 
 				$stats['processed']++;
@@ -199,6 +201,7 @@ class LogsModel extends ListModel
 			}
 
 			$this->updateLocation((int) $row->id, [
+				'ip_classification' => $classification,
 				'country_code' => $status === 'success' ? $this->trimLocationValue($data['country_code'] ?? null, 10) : null,
 				'country_name' => $status === 'success' ? $this->trimLocationValue($data['country'] ?? null, 100) : null,
 				'continent_code' => $status === 'success' ? $this->trimLocationValue($data['continent_code'] ?? null, 10) : null,
@@ -257,7 +260,15 @@ class LogsModel extends ListModel
 			->from($db->quoteName('#__downloadtracker_logs'))
 			->where($db->quoteName('ip_address') . ' IS NOT NULL')
 			->where($db->quoteName('ip_address') . ' <> ' . $db->quote(''))
-			->where($db->quoteName('ip_location_checked_at') . ' IS NULL')
+			->where(
+				'('
+				. $db->quoteName('ip_location_checked_at') . ' IS NULL'
+				. ' OR ('
+				. $db->quoteName('ip_location_status') . ' = ' . $db->quote('skipped_private_ip')
+				. ' AND ' . $db->quoteName('ip_classification') . ' IS NULL'
+				. ')'
+				. ')'
+			)
 			->order($db->quoteName('downloaded_at') . ' DESC');
 
 		$db->setQuery($query, 0, $batchSize);
@@ -284,12 +295,49 @@ class LogsModel extends ListModel
 		return mb_substr($value, 0, $maxLength);
 	}
 
-	private function isPrivateOrReservedIp(string $ip): bool
+	private function classifyIp(string $ip): string
 	{
-		return filter_var(
+		if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+			return 'invalid';
+		}
+
+		if ($ip === '127.0.0.1' || $ip === '::1') {
+			return 'localhost';
+		}
+
+		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+			$long = ip2long($ip);
+
+			if ($long === false) {
+				return 'invalid';
+			}
+
+			$unsigned = sprintf('%u', $long);
+
+			if ($unsigned >= sprintf('%u', ip2long('172.16.0.0')) && $unsigned <= sprintf('%u', ip2long('172.31.255.255'))) {
+				return 'docker_network';
+			}
+
+			if (
+				($unsigned >= sprintf('%u', ip2long('10.0.0.0')) && $unsigned <= sprintf('%u', ip2long('10.255.255.255')))
+				|| ($unsigned >= sprintf('%u', ip2long('192.168.0.0')) && $unsigned <= sprintf('%u', ip2long('192.168.255.255')))
+			) {
+				return 'private_network';
+			}
+		}
+
+		if (filter_var(
 			$ip,
 			FILTER_VALIDATE_IP,
 			FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-		) === false;
+		) !== false) {
+			return 'public';
+		}
+
+		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) !== false) {
+			return 'private_network';
+		}
+
+		return 'reserved';
 	}
 }

@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`requested_url` text NULL,
 	`target_url` text NOT NULL,
 	`status` varchar(20) NOT NULL DEFAULT 'redirected',
+	`ip_classification` varchar(50) NULL,
 	`country_code` varchar(10) NULL,
 	`country_name` varchar(100) NULL,
 	`continent_code` varchar(10) NULL,
