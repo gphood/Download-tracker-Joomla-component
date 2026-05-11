@@ -53,10 +53,10 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 				<span><?php echo $this->escape($this->geolocationSetupNotice); ?></span>
 			</div>
 			<div class="com-downloadtracker-setup-notice__actions">
-				<a class="btn btn-sm btn-outline-secondary" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
+				<a class="btn btn-sm com-downloadtracker-setup-notice__button" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
 				</a>
-				<button type="button" class="btn btn-sm btn-outline-secondary" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
+				<button type="button" class="btn btn-sm com-downloadtracker-setup-notice__button" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_DISMISS_BUTTON'); ?>
 				</button>
 			</div>
