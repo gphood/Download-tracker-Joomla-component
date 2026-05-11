@@ -15,6 +15,7 @@ namespace GrantHood\Component\DownloadTracker\Site\Model;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Uri\Uri;
 
 class DownloadModel extends BaseDatabaseModel
 {
@@ -42,6 +43,8 @@ class DownloadModel extends BaseDatabaseModel
 		$server = $app->getInput()->server;
 		$db = $this->getDatabase();
 		$userAgent = $server->getString('HTTP_USER_AGENT', '');
+		$requestedUrl = Uri::getInstance()->toString();
+		$referrer = $server->getString('HTTP_REFERER', '');
 
 		$log = (object) [
 			'item_id' => (int) $item->id,
@@ -54,7 +57,8 @@ class DownloadModel extends BaseDatabaseModel
 			'ip_address' => $server->getString('REMOTE_ADDR', ''),
 			'user_agent' => $userAgent,
 			'is_bot' => $this->isBotUserAgent($userAgent) ? 1 : 0,
-			'referrer' => $server->getString('HTTP_REFERER', ''),
+			'referrer' => $referrer,
+			'requested_url' => $requestedUrl,
 			'target_url' => (string) $item->target_url,
 			'status' => 'redirected',
 		];

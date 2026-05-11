@@ -2,3 +2,47 @@
 	max-width: 32rem;
 	overflow-wrap: anywhere;
 }
+
+.com-downloadtracker-logs-table {
+	font-size: .78rem;
+	line-height: 1.25;
+	min-width: 82rem;
+}
+
+.com-downloadtracker-logs-table th,
+.com-downloadtracker-logs-table td {
+	padding: .35rem .45rem;
+	vertical-align: top;
+}
+
+.com-downloadtracker-url-cell {
+	max-width: 18rem;
+	overflow-wrap: anywhere;
+}
+
+.com-downloadtracker-referrer-cell {
+	max-width: 26rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.com-downloadtracker-nowrap {
+	white-space: nowrap;
+}
+
+.com-downloadtracker-scroll-table {
+	max-height: 20rem;
+	overflow: auto;
+}
+
+.com-downloadtracker-scroll-table .table {
+	margin-bottom: 0;
+}
+
+.com-downloadtracker-scroll-table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--template-bg-light, #fff);
+}

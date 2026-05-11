@@ -14,6 +14,7 @@ namespace GrantHood\Component\DownloadTracker\Administrator\View\Logs;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
@@ -36,6 +37,10 @@ class HtmlView extends BaseHtmlView
 
 		ToolbarHelper::title(Text::_('COM_DOWNLOADTRACKER_MANAGER_LOGS'), 'list');
 		ToolbarHelper::custom('logs.exportCsv', 'download', '', 'COM_DOWNLOADTRACKER_EXPORT_CSV', false);
+
+		if (ContentHelper::getActions('com_downloadtracker')->get('core.delete')) {
+			ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'logs.delete');
+		}
 
 		Factory::getApplication()->getDocument()->getWebAssetManager()
 			->registerAndUseStyle('com_downloadtracker.admin', 'media/com_downloadtracker/css/admin.css');

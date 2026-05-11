@@ -27,7 +27,7 @@ class LogsModel extends ListModel
 				'product_title', 'p.title', 'edition', 'a.edition', 'version', 'a.version',
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
-				'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
+				'requested_url', 'a.requested_url', 'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
 			];
 		}
 
@@ -53,7 +53,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
@@ -69,12 +69,14 @@ class LogsModel extends ListModel
 				. $db->quoteName('a.requested_alias') . ' LIKE :search_alias'
 				. ' OR ' . $db->quoteName('a.ip_address') . ' LIKE :search_ip'
 				. ' OR ' . $db->quoteName('a.referrer') . ' LIKE :search_referrer'
+				. ' OR ' . $db->quoteName('a.requested_url') . ' LIKE :search_requested_url'
 				. ' OR ' . $db->quoteName('a.user_agent') . ' LIKE :search_user_agent'
 				. ')'
 			)
 				->bind(':search_alias', $search)
 				->bind(':search_ip', $search)
 				->bind(':search_referrer', $search)
+				->bind(':search_requested_url', $search)
 				->bind(':search_user_agent', $search);
 		}
 
@@ -129,5 +131,24 @@ class LogsModel extends ListModel
 		$db->setQuery($query);
 
 		return $db->loadObjectList();
+	}
+
+	public function deleteSelected(array $ids): int
+	{
+		$ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+
+		if ($ids === []) {
+			return 0;
+		}
+
+		$db = $this->getDatabase();
+		$query = $db->getQuery(true)
+			->delete($db->quoteName('#__downloadtracker_logs'))
+			->whereIn($db->quoteName('id'), $ids);
+
+		$db->setQuery($query);
+		$db->execute();
+
+		return $db->getAffectedRows();
 	}
 }

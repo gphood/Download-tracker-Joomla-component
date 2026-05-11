@@ -16,10 +16,43 @@ namespace GrantHood\Component\DownloadTracker\Administrator\Controller;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 
 class LogsController extends BaseController
 {
+	public function delete(): void
+	{
+		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
+
+		$app = Factory::getApplication();
+
+		if (!$app->getIdentity()->authorise('core.delete', 'com_downloadtracker')) {
+			throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		$ids = $app->getInput()->get('cid', [], 'array');
+
+		if ($ids === []) {
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_NO_LOGS_SELECTED'), 'warning');
+			$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
+
+			return;
+		}
+
+		/** @var \GrantHood\Component\DownloadTracker\Administrator\Model\LogsModel $model */
+		$model = $this->getModel('Logs', 'Administrator');
+		$deleted = $model->deleteSelected($ids);
+
+		if ($deleted === 0) {
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_NO_LOGS_SELECTED'), 'warning');
+		} else {
+			$app->enqueueMessage(Text::plural('COM_DOWNLOADTRACKER_N_LOGS_DELETED', $deleted), 'message');
+		}
+
+		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
+	}
+
 	public function exportCsv(): void
 	{
 		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
@@ -45,6 +78,7 @@ class LogsController extends BaseController
 			'ip_address',
 			'is_bot',
 			'referrer',
+			'requested_url',
 			'user_agent',
 			'target_url',
 			'status',
@@ -62,6 +96,7 @@ class LogsController extends BaseController
 				(string) $row->ip_address,
 				(int) $row->is_bot,
 				(string) $row->referrer,
+				(string) $row->requested_url,
 				(string) $row->user_agent,
 				(string) $row->target_url,
 				(string) $row->status,

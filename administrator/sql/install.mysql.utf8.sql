@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`user_agent` text NULL,
 	`is_bot` tinyint NOT NULL DEFAULT 0,
 	`referrer` text NULL,
+	`requested_url` text NULL,
 	`target_url` text NOT NULL,
 	`status` varchar(20) NOT NULL DEFAULT 'redirected',
 	PRIMARY KEY (`id`),

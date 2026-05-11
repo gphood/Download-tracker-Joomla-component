@@ -24,12 +24,18 @@ class HtmlView extends BaseHtmlView
 
 	public array $topItems = [];
 
+	public array $topReferrers = [];
+
+	public array $downloadsByDay = [];
+
 	public array $latestLogs = [];
 
 	public function display($tpl = null): void
 	{
 		$this->summary = $this->get('Summary');
 		$this->topItems = $this->get('TopItems');
+		$this->topReferrers = $this->get('TopReferrers');
+		$this->downloadsByDay = $this->get('DownloadsByDay');
 		$this->latestLogs = $this->get('LatestLogs');
 
 		ToolbarHelper::title(Text::_('COM_DOWNLOADTRACKER_MANAGER_DASHBOARD'), 'download');
