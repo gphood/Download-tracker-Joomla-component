@@ -47,11 +47,19 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 	<?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
 
 	<?php if ($this->geolocationSetupNotice !== '') : ?>
-		<div class="alert alert-info d-flex flex-column flex-lg-row gap-2 justify-content-between align-items-lg-center">
-			<div><?php echo $this->escape($this->geolocationSetupNotice); ?></div>
-			<a class="btn btn-sm btn-info flex-shrink-0" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
-				<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
-			</a>
+		<div class="alert alert-info com-downloadtracker-setup-notice">
+			<div class="com-downloadtracker-setup-notice__message">
+				<span class="icon-info-circle" aria-hidden="true"></span>
+				<span><?php echo $this->escape($this->geolocationSetupNotice); ?></span>
+			</div>
+			<div class="com-downloadtracker-setup-notice__actions">
+				<a class="btn btn-sm btn-outline-secondary" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
+					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
+				</a>
+				<button type="button" class="btn btn-sm btn-outline-secondary" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
+					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_DISMISS_BUTTON'); ?>
+				</button>
+			</div>
 		</div>
 	<?php endif; ?>
 

@@ -36,6 +36,38 @@
 	white-space: nowrap;
 }
 
+.com-downloadtracker-setup-notice {
+	display: flex;
+	flex-direction: column;
+	gap: .75rem;
+}
+
+.com-downloadtracker-setup-notice__message {
+	display: flex;
+	align-items: flex-start;
+	gap: .5rem;
+	text-align: left;
+}
+
+.com-downloadtracker-setup-notice__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+}
+
+@media (min-width: 992px) {
+	.com-downloadtracker-setup-notice {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.com-downloadtracker-setup-notice__actions {
+		flex-shrink: 0;
+		justify-content: flex-end;
+	}
+}
+
 .com-downloadtracker-scroll-table {
 	max-height: 20rem;
 	overflow: auto;
