@@ -53,6 +53,42 @@ class LogsController extends BaseController
 		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
 	}
 
+	public function enrichLocations(): void
+	{
+		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
+
+		$app = Factory::getApplication();
+
+		if (!$app->getIdentity()->authorise('core.manage', 'com_downloadtracker')) {
+			throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		/** @var \GrantHood\Component\DownloadTracker\Administrator\Model\LogsModel $model */
+		$model = $this->getModel('Logs', 'Administrator');
+		$stats = $model->enrichLocations();
+
+		if ($stats['error'] === 'provider') {
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IP_LOCATION_PROVIDER_DISABLED'), 'warning');
+		} elseif ($stats['error'] === 'token') {
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IPINFO_LITE_TOKEN_MISSING'), 'warning');
+		} elseif ((int) $stats['processed'] === 0) {
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_IP_LOCATION_NO_LOGS'), 'message');
+		} else {
+			$app->enqueueMessage(
+				Text::sprintf(
+					'COM_DOWNLOADTRACKER_IP_LOCATION_ENRICHED',
+					(int) $stats['processed'],
+					(int) $stats['success'],
+					(int) $stats['failed'],
+					(int) $stats['skipped']
+				),
+				'message'
+			);
+		}
+
+		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
+	}
+
 	public function exportCsv(): void
 	{
 		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
@@ -76,6 +112,16 @@ class LogsController extends BaseController
 			'version',
 			'resolved_version',
 			'ip_address',
+			'country_code',
+			'country_name',
+			'continent_code',
+			'continent_name',
+			'asn',
+			'asn_name',
+			'asn_domain',
+			'ip_location_provider',
+			'ip_location_checked_at',
+			'ip_location_status',
 			'is_bot',
 			'referrer',
 			'requested_url',
@@ -94,6 +140,16 @@ class LogsController extends BaseController
 				(string) $row->version,
 				(string) $row->resolved_version,
 				(string) $row->ip_address,
+				(string) $row->country_code,
+				(string) $row->country_name,
+				(string) $row->continent_code,
+				(string) $row->continent_name,
+				(string) $row->asn,
+				(string) $row->asn_name,
+				(string) $row->asn_domain,
+				(string) $row->ip_location_provider,
+				(string) $row->ip_location_checked_at,
+				(string) $row->ip_location_status,
 				(int) $row->is_bot,
 				(string) $row->referrer,
 				(string) $row->requested_url,

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<fieldset
+		name="geolocation"
+		label="COM_DOWNLOADTRACKER_CONFIG_GEOLOCATION_LABEL"
+		description="COM_DOWNLOADTRACKER_CONFIG_GEOLOCATION_DESC"
+	>
+		<field
+			name="ip_geolocation_provider"
+			type="list"
+			label="COM_DOWNLOADTRACKER_FIELD_IP_GEOLOCATION_PROVIDER_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_IP_GEOLOCATION_PROVIDER_DESC"
+			default="none"
+			validate="options"
+		>
+			<option value="none">COM_DOWNLOADTRACKER_OPTION_IP_GEOLOCATION_NONE</option>
+			<option value="ipinfo_lite">COM_DOWNLOADTRACKER_OPTION_IP_GEOLOCATION_IPINFO_LITE</option>
+		</field>
+		<field
+			name="ipinfo_lite_token"
+			type="password"
+			label="COM_DOWNLOADTRACKER_FIELD_IPINFO_LITE_TOKEN_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_IPINFO_LITE_TOKEN_DESC"
+			filter="string"
+			showon="ip_geolocation_provider:ipinfo_lite"
+		/>
+		<field
+			name="ip_location_batch_size"
+			type="number"
+			label="COM_DOWNLOADTRACKER_FIELD_IP_LOCATION_BATCH_SIZE_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_IP_LOCATION_BATCH_SIZE_DESC"
+			default="25"
+			min="1"
+			max="100"
+			step="1"
+			filter="integer"
+		/>
+		<field
+			name="ipinfo_lite_attribution"
+			type="spacer"
+			label="COM_DOWNLOADTRACKER_IPINFO_ATTRIBUTION"
+		/>
+	</fieldset>
+</config>

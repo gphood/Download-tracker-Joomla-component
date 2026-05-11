@@ -57,10 +57,22 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`requested_url` text NULL,
 	`target_url` text NOT NULL,
 	`status` varchar(20) NOT NULL DEFAULT 'redirected',
+	`country_code` varchar(10) NULL,
+	`country_name` varchar(100) NULL,
+	`continent_code` varchar(10) NULL,
+	`continent_name` varchar(100) NULL,
+	`asn` varchar(50) NULL,
+	`asn_name` varchar(255) NULL,
+	`asn_domain` varchar(255) NULL,
+	`ip_location_provider` varchar(100) NULL,
+	`ip_location_checked_at` datetime NULL,
+	`ip_location_status` varchar(50) NULL,
+	`ip_location_response` mediumtext NULL,
 	PRIMARY KEY (`id`),
 	KEY `idx_item_id` (`item_id`),
 	KEY `idx_product_id` (`product_id`),
 	KEY `idx_downloaded_at` (`downloaded_at`),
 	KEY `idx_is_bot` (`is_bot`),
-	KEY `idx_status` (`status`)
+	KEY `idx_status` (`status`),
+	KEY `idx_ip_location_checked_at` (`ip_location_checked_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;

@@ -37,6 +37,7 @@ class HtmlView extends BaseHtmlView
 
 		ToolbarHelper::title(Text::_('COM_DOWNLOADTRACKER_MANAGER_LOGS'), 'list');
 		ToolbarHelper::custom('logs.exportCsv', 'download', '', 'COM_DOWNLOADTRACKER_EXPORT_CSV', false);
+		ToolbarHelper::custom('logs.enrichLocations', 'location', '', 'COM_DOWNLOADTRACKER_ENRICH_LOCATIONS', false);
 
 		if (ContentHelper::getActions('com_downloadtracker')->get('core.delete')) {
 			ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'logs.delete');

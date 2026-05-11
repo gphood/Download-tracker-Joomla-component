@@ -77,6 +77,22 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 					$displayReferrer = $isDownloadRequestReferrer($referrer, $requestedUrl, $requestedAlias)
 						? Text::_('COM_DOWNLOADTRACKER_DIRECT_UNAVAILABLE')
 						: $referrer;
+					$locationTitleParts = [];
+
+					foreach ([
+						'COM_DOWNLOADTRACKER_LOCATION_COUNTRY' => trim((string) $item->country_name),
+						'COM_DOWNLOADTRACKER_LOCATION_CONTINENT' => trim((string) $item->continent_name),
+						'COM_DOWNLOADTRACKER_LOCATION_ASN' => trim((string) $item->asn),
+						'COM_DOWNLOADTRACKER_LOCATION_ASN_NAME' => trim((string) $item->asn_name),
+						'COM_DOWNLOADTRACKER_LOCATION_PROVIDER' => trim((string) $item->ip_location_provider),
+						'COM_DOWNLOADTRACKER_LOCATION_CHECKED_AT' => trim((string) $item->ip_location_checked_at),
+					] as $label => $value) {
+						if ($value !== '') {
+							$locationTitleParts[] = Text::_($label) . ': ' . $value;
+						}
+					}
+
+					$locationTitle = implode(' | ', $locationTitleParts);
 					?>
 					<tr class="row<?php echo $i % 2; ?>">
 						<td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, $item->id); ?></td>
@@ -87,7 +103,14 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 						<td><?php echo $this->escape((string) $item->edition); ?></td>
 						<td><?php echo $this->escape((string) $item->version); ?></td>
 						<td><?php echo $this->escape((string) $item->resolved_version); ?></td>
-						<td><?php echo $this->escape((string) $item->ip_address); ?></td>
+						<td class="com-downloadtracker-nowrap">
+							<span<?php echo $locationTitle !== '' ? ' title="' . $this->escape($locationTitle) . '"' : ''; ?>>
+								<?php echo $this->escape((string) $item->ip_address); ?>
+								<?php if (trim((string) $item->country_code) !== '') : ?>
+									<span class="badge bg-info text-dark ms-1"><?php echo $this->escape((string) $item->country_code); ?></span>
+								<?php endif; ?>
+							</span>
+						</td>
 						<td><?php echo ((int) $item->is_bot === 1) ? Text::_('JYES') : Text::_('JNO'); ?></td>
 						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($displayReferrer); ?></td>
 						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($requestedUrl); ?></td>
