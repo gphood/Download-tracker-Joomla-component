@@ -5,7 +5,7 @@
 	<creationDate>2026-05-08</creationDate>
 	<copyright>(C) 2026 Grant Hood. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>0.1.21</version>
+	<version>0.1.22</version>
 	<description>COM_DOWNLOADTRACKER_XML_DESCRIPTION</description>
 	<namespace path="src">GrantHood\Component\DownloadTracker</namespace>
 
