@@ -56,31 +56,66 @@
 }
 
 .com-downloadtracker-setup-notice__button {
-	--downloadtracker-notice-button-bg: #f8fafc;
-	--downloadtracker-notice-button-border: #94a3b8;
-	--downloadtracker-notice-button-color: #1f2937;
-	--downloadtracker-notice-button-hover-bg: #e2e8f0;
 	--downloadtracker-notice-button-focus-ring: rgba(37, 99, 235, .32);
-	background: var(--downloadtracker-notice-button-bg);
-	border-color: var(--downloadtracker-notice-button-border);
-	color: var(--downloadtracker-notice-button-color);
+	align-items: center;
+	display: inline-flex;
+	gap: .35rem;
 	font-weight: 500;
 	white-space: nowrap;
-}
-
-.com-downloadtracker-setup-notice__button:hover,
-.com-downloadtracker-setup-notice__button:focus,
-.com-downloadtracker-setup-notice__button:active,
-.com-downloadtracker-setup-notice__button.active {
-	background: var(--downloadtracker-notice-button-hover-bg);
-	border-color: var(--downloadtracker-notice-button-border);
-	color: var(--downloadtracker-notice-button-color);
 }
 
 .com-downloadtracker-setup-notice__button:focus,
 .com-downloadtracker-setup-notice__button:focus-visible {
 	box-shadow: 0 0 0 .2rem var(--downloadtracker-notice-button-focus-ring);
 	outline: 0;
+}
+
+.com-downloadtracker-setup-notice__button--primary {
+	background: #1f5f99;
+	border-color: #1f5f99;
+	color: #fff;
+}
+
+.com-downloadtracker-setup-notice__button--primary:hover,
+.com-downloadtracker-setup-notice__button--primary:focus,
+.com-downloadtracker-setup-notice__button--primary:active,
+.com-downloadtracker-setup-notice__button--primary.active {
+	background: #184b78;
+	border-color: #184b78;
+	color: #fff;
+}
+
+.com-downloadtracker-setup-notice__button--secondary {
+	background: #f8fafc;
+	border-color: #64748b;
+	color: #1f2937;
+}
+
+.com-downloadtracker-setup-notice__button--secondary:hover,
+.com-downloadtracker-setup-notice__button--secondary:focus,
+.com-downloadtracker-setup-notice__button--secondary:active,
+.com-downloadtracker-setup-notice__button--secondary.active {
+	background: #e2e8f0;
+	border-color: #475569;
+	color: #111827;
+}
+
+.com-downloadtracker-setup-notice__button--dismiss {
+	background: transparent;
+	border-color: transparent;
+	color: #334155;
+	padding-inline: .35rem;
+	text-decoration: underline;
+	text-underline-offset: .16em;
+}
+
+.com-downloadtracker-setup-notice__button--dismiss:hover,
+.com-downloadtracker-setup-notice__button--dismiss:focus,
+.com-downloadtracker-setup-notice__button--dismiss:active,
+.com-downloadtracker-setup-notice__button--dismiss.active {
+	background: rgba(255, 255, 255, .55);
+	border-color: rgba(71, 85, 105, .28);
+	color: #111827;
 }
 
 @media (min-width: 992px) {
