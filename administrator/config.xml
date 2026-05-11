@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<config>
+<config addfieldprefix="GrantHood\Component\DownloadTracker\Administrator\Field">
 	<fieldset
 		name="geolocation"
 		label="COM_DOWNLOADTRACKER_CONFIG_GEOLOCATION_LABEL"
@@ -18,8 +18,7 @@
 		</field>
 		<field
 			name="ipinfo_lite_help"
-			type="spacer"
-			label="COM_DOWNLOADTRACKER_IPINFO_LITE_HELP"
+			type="ipinfohelp"
 			showon="ip_geolocation_provider:ipinfo_lite"
 		/>
 		<field
