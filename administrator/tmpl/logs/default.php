@@ -56,6 +56,10 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 				<a class="btn btn-sm com-downloadtracker-setup-notice__button" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
 				</a>
+				<a class="btn btn-sm com-downloadtracker-setup-notice__button" href="https://ipinfo.io/lite" target="_blank" rel="noopener noreferrer">
+					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_IPINFO_BUTTON'); ?>
+					<span class="icon-out-2" aria-hidden="true"></span>
+				</a>
 				<button type="button" class="btn btn-sm com-downloadtracker-setup-notice__button" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_DISMISS_BUTTON'); ?>
 				</button>
