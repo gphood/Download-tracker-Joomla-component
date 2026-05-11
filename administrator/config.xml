@@ -17,6 +17,12 @@
 			<option value="ipinfo_lite">COM_DOWNLOADTRACKER_OPTION_IP_GEOLOCATION_IPINFO_LITE</option>
 		</field>
 		<field
+			name="ipinfo_lite_help"
+			type="spacer"
+			label="COM_DOWNLOADTRACKER_IPINFO_LITE_HELP"
+			showon="ip_geolocation_provider:ipinfo_lite"
+		/>
+		<field
 			name="ipinfo_lite_token"
 			type="password"
 			label="COM_DOWNLOADTRACKER_FIELD_IPINFO_LITE_TOKEN_LABEL"

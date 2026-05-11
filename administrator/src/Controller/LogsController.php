@@ -70,7 +70,7 @@ class LogsController extends BaseController
 		if ($stats['error'] === 'provider') {
 			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IP_LOCATION_PROVIDER_DISABLED'), 'warning');
 		} elseif ($stats['error'] === 'token') {
-			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IPINFO_LITE_TOKEN_MISSING'), 'warning');
+			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IPINFO_LITE_TOKEN_MISSING_ENABLED'), 'warning');
 		} elseif ((int) $stats['processed'] === 0) {
 			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_IP_LOCATION_NO_LOGS'), 'message');
 		} else {

@@ -14,6 +14,7 @@ namespace GrantHood\Component\DownloadTracker\Administrator\View\Logs;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
@@ -37,7 +38,12 @@ class HtmlView extends BaseHtmlView
 
 		ToolbarHelper::title(Text::_('COM_DOWNLOADTRACKER_MANAGER_LOGS'), 'list');
 		ToolbarHelper::custom('logs.exportCsv', 'download', '', 'COM_DOWNLOADTRACKER_EXPORT_CSV', false);
-		ToolbarHelper::custom('logs.enrichLocations', 'location', '', 'COM_DOWNLOADTRACKER_ENRICH_LOCATIONS', false);
+
+		$params = ComponentHelper::getParams('com_downloadtracker');
+
+		if ((string) $params->get('ip_geolocation_provider', 'none') === 'ipinfo_lite') {
+			ToolbarHelper::custom('logs.enrichLocations', 'location', '', 'COM_DOWNLOADTRACKER_ENRICH_IP_LOCATIONS', false);
+		}
 
 		if (ContentHelper::getActions('com_downloadtracker')->get('core.delete')) {
 			ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'logs.delete');

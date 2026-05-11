@@ -15,6 +15,7 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
 
 HTMLHelper::_('behavior.multiselect');
+HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn = $this->escape($this->state->get('list.direction'));
@@ -85,26 +86,29 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 						'reserved' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_RESERVED'),
 						'invalid' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_INVALID'),
 					];
-					$locationTitleParts = [];
+					$classificationTooltips = [
+						'localhost' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_LOCALHOST_TOOLTIP'),
+						'private_network' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_PRIVATE_NETWORK_TOOLTIP'),
+						'docker_network' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_DOCKER_NETWORK_TOOLTIP'),
+						'reserved' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_RESERVED_TOOLTIP'),
+						'invalid' => Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_INVALID_TOOLTIP'),
+					];
+					$countryTooltipParts = array_filter([
+						trim((string) $item->country_name) !== '' ? rtrim(trim((string) $item->country_name), '.') . '.' : '',
+						trim((string) $item->continent_name) !== '' ? Text::sprintf('COM_DOWNLOADTRACKER_LOCATION_TOOLTIP_CONTINENT', trim((string) $item->continent_name)) : '',
+						trim((string) $item->asn . ' ' . (string) $item->asn_name) !== '' ? Text::sprintf('COM_DOWNLOADTRACKER_LOCATION_TOOLTIP_ASN', trim((string) $item->asn . ' ' . (string) $item->asn_name)) : '',
+						trim((string) $item->ip_location_provider) !== '' ? Text::sprintf('COM_DOWNLOADTRACKER_LOCATION_TOOLTIP_PROVIDER', Text::_('COM_DOWNLOADTRACKER_PROVIDER_IPINFO_LITE')) : '',
+						trim((string) $item->ip_location_checked_at) !== '' ? Text::sprintf('COM_DOWNLOADTRACKER_LOCATION_TOOLTIP_CHECKED', trim((string) $item->ip_location_checked_at)) : '',
+					], static fn (string $value): bool => $value !== '');
+					$countryTooltip = implode(' ', $countryTooltipParts);
 
-					if (trim((string) $item->country_code) === '' && isset($classificationLabels[$classification])) {
-						$locationTitleParts[] = Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_NOT_PUBLIC_TOOLTIP');
-					} else {
-						foreach ([
-							'COM_DOWNLOADTRACKER_LOCATION_COUNTRY' => trim((string) $item->country_name),
-							'COM_DOWNLOADTRACKER_LOCATION_CONTINENT' => trim((string) $item->continent_name),
-							'COM_DOWNLOADTRACKER_LOCATION_ASN' => trim((string) $item->asn),
-							'COM_DOWNLOADTRACKER_LOCATION_ASN_NAME' => trim((string) $item->asn_name),
-							'COM_DOWNLOADTRACKER_LOCATION_PROVIDER' => trim((string) $item->ip_location_provider),
-							'COM_DOWNLOADTRACKER_LOCATION_CHECKED_AT' => trim((string) $item->ip_location_checked_at),
-						] as $label => $value) {
-							if ($value !== '') {
-								$locationTitleParts[] = Text::_($label) . ': ' . $value;
-							}
-						}
+					if ($countryTooltip !== '' && substr($countryTooltip, -1) !== '.') {
+						$countryTooltip .= '.';
 					}
 
-					$locationTitle = implode(' | ', $locationTitleParts);
+					if ($countryTooltip === '') {
+						$countryTooltip = Text::_('COM_DOWNLOADTRACKER_LOCATION_TOOLTIP_UNAVAILABLE');
+					}
 					?>
 					<tr class="row<?php echo $i % 2; ?>">
 						<td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, $item->id); ?></td>
@@ -116,12 +120,12 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 						<td><?php echo $this->escape((string) $item->version); ?></td>
 						<td><?php echo $this->escape((string) $item->resolved_version); ?></td>
 						<td class="com-downloadtracker-nowrap">
-							<span<?php echo $locationTitle !== '' ? ' title="' . $this->escape($locationTitle) . '"' : ''; ?>>
+							<span>
 								<?php echo $this->escape((string) $item->ip_address); ?>
 								<?php if (trim((string) $item->country_code) !== '') : ?>
-									<span class="badge bg-info text-dark ms-1"><?php echo $this->escape((string) $item->country_code); ?></span>
+									<span class="badge bg-info text-dark ms-1 hasTooltip com-downloadtracker-ip-badge" title="<?php echo $this->escape($countryTooltip); ?>"><?php echo $this->escape((string) $item->country_code); ?></span>
 								<?php elseif (isset($classificationLabels[$classification])) : ?>
-									<span class="badge bg-secondary ms-1"><?php echo $this->escape($classificationLabels[$classification]); ?></span>
+									<span class="badge bg-secondary ms-1 hasTooltip com-downloadtracker-ip-badge" title="<?php echo $this->escape($classificationTooltips[$classification] ?? Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_NOT_PUBLIC_TOOLTIP')); ?>"><?php echo $this->escape($classificationLabels[$classification]); ?></span>
 								<?php endif; ?>
 							</span>
 						</td>
