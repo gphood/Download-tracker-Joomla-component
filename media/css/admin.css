@@ -36,6 +36,10 @@
 	white-space: nowrap;
 }
 
+.com-downloadtracker-ip-badge--country {
+	color: #fff !important;
+}
+
 .com-downloadtracker-setup-notice {
 	display: flex;
 	flex-direction: column;

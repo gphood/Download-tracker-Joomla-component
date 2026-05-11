@@ -143,7 +143,7 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 							<span>
 								<?php echo $this->escape((string) $item->ip_address); ?>
 								<?php if (trim((string) $item->country_code) !== '') : ?>
-									<span class="badge bg-info text-dark ms-1 hasTooltip com-downloadtracker-ip-badge" title="<?php echo $this->escape($countryTooltip); ?>"><?php echo $this->escape((string) $item->country_code); ?></span>
+									<span class="badge bg-info ms-1 hasTooltip com-downloadtracker-ip-badge com-downloadtracker-ip-badge--country" title="<?php echo $this->escape($countryTooltip); ?>"><?php echo $this->escape((string) $item->country_code); ?></span>
 								<?php elseif (isset($classificationLabels[$classification])) : ?>
 									<span class="badge bg-secondary ms-1 hasTooltip com-downloadtracker-ip-badge" title="<?php echo $this->escape($classificationTooltips[$classification] ?? Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_NOT_PUBLIC_TOOLTIP')); ?>"><?php echo $this->escape($classificationLabels[$classification]); ?></span>
 								<?php endif; ?>
