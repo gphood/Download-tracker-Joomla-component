@@ -53,14 +53,14 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 				<span><?php echo $this->escape($this->geolocationSetupNotice); ?></span>
 			</div>
 			<div class="com-downloadtracker-setup-notice__actions">
-				<a class="btn btn-sm com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--primary" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
+				<a class="btn btn-sm btn-primary com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--primary" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
 				</a>
-				<a class="btn btn-sm com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--secondary" href="https://ipinfo.io/lite" target="_blank" rel="noopener noreferrer">
+				<a class="btn btn-sm btn-light border com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--secondary" href="https://ipinfo.io/lite" target="_blank" rel="noopener noreferrer">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_IPINFO_BUTTON'); ?>
-					<span class="icon-out-2" aria-hidden="true"></span>
+					<span class="icon-out-2 ms-1" aria-hidden="true"></span>
 				</a>
-				<button type="button" class="btn btn-sm com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--dismiss" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
+				<button type="button" class="btn btn-sm btn-light border com-downloadtracker-setup-notice__button com-downloadtracker-setup-notice__button--dismiss" onclick="Joomla.submitbutton('logs.dismissGeolocationSetupNotice');">
 					<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_DISMISS_BUTTON'); ?>
 				</button>
 			</div>
