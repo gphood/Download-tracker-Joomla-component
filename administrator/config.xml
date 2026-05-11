@@ -42,6 +42,18 @@
 			filter="integer"
 		/>
 		<field
+			name="show_geolocation_setup_notice"
+			type="radio"
+			label="COM_DOWNLOADTRACKER_FIELD_SHOW_GEOLOCATION_SETUP_NOTICE_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_SHOW_GEOLOCATION_SETUP_NOTICE_DESC"
+			default="1"
+			filter="integer"
+			layout="joomla.form.field.radio.switcher"
+		>
+			<option value="1">JYES</option>
+			<option value="0">JNO</option>
+		</field>
+		<field
 			name="ipinfo_lite_attribution"
 			type="spacer"
 			label="COM_DOWNLOADTRACKER_IPINFO_ATTRIBUTION"

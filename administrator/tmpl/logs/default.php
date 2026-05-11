@@ -46,6 +46,15 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 <form action="<?php echo Route::_('index.php?option=com_downloadtracker&view=logs'); ?>" method="post" name="adminForm" id="adminForm">
 	<?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
 
+	<?php if ($this->geolocationSetupNotice !== '') : ?>
+		<div class="alert alert-info d-flex flex-column flex-lg-row gap-2 justify-content-between align-items-lg-center">
+			<div><?php echo $this->escape($this->geolocationSetupNotice); ?></div>
+			<a class="btn btn-sm btn-info flex-shrink-0" href="<?php echo Route::_($this->geolocationOptionsUrl); ?>">
+				<?php echo Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_OPTIONS_BUTTON'); ?>
+			</a>
+		</div>
+	<?php endif; ?>
+
 	<?php if (empty($this->items)) : ?>
 		<div class="alert alert-info"><?php echo Text::_($hasActiveFilters ? 'JGLOBAL_NO_MATCHING_RESULTS' : 'COM_DOWNLOADTRACKER_NO_LOGS'); ?></div>
 	<?php else : ?>
