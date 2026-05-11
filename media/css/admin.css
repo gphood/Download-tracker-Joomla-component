@@ -108,7 +108,7 @@
 	border-color: transparent !important;
 	color: #334155 !important;
 	padding-inline: .35rem;
-	text-decoration: none !important;
+	text-decoration: underline !important;
 	text-underline-offset: .16em;
 }
 
@@ -116,10 +116,10 @@
 .com-downloadtracker-setup-notice__button--dismiss:focus,
 .com-downloadtracker-setup-notice__button--dismiss:active,
 .com-downloadtracker-setup-notice__button--dismiss.active {
-	background: rgba(255, 255, 255, .55);
-	border-color: rgba(71, 85, 105, .28);
-	color: #111827;
-	text-decoration: none !important;
+	background: rgba(255, 255, 255, .55) !important;
+	border-color: rgba(71, 85, 105, .28) !important;
+	color: #111827 !important;
+	text-decoration: underline !important;
 }
 
 @media (min-width: 992px) {
