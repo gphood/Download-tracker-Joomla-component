@@ -36,6 +36,14 @@ class DownloadController extends BaseController
 			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_FOUND'));
 		}
 
+		if ((int) ($item->requires_token ?? 0) === 1) {
+			$token = $this->input->getString('token', '');
+
+			if (!$model->validateToken($item, $token)) {
+				throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_AVAILABLE'));
+			}
+		}
+
 		$sourceType = (string) ($item->source_type ?: 'external');
 
 		if ($sourceType !== 'private_file') {

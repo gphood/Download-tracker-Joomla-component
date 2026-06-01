@@ -16,6 +16,7 @@ namespace GrantHood\Component\DownloadTracker\Site\Model;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Database\ParameterType;
 
 class DownloadModel extends BaseDatabaseModel
 {
@@ -23,7 +24,7 @@ class DownloadModel extends BaseDatabaseModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['i.id', 'i.product_id', 'i.title', 'i.alias', 'i.edition', 'i.version', 'i.source_type', 'i.target_url', 'i.private_file']))
+			->select($db->quoteName(['i.id', 'i.product_id', 'i.title', 'i.alias', 'i.edition', 'i.version', 'i.source_type', 'i.target_url', 'i.private_file', 'i.requires_token']))
 			->from($db->quoteName('#__downloadtracker_items', 'i'))
 			->innerJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('i.product_id'))
 			->where($db->quoteName('i.alias') . ' = :alias')
@@ -35,6 +36,36 @@ class DownloadModel extends BaseDatabaseModel
 		$item = $db->loadObject();
 
 		return $item ?: null;
+	}
+
+	public function validateToken(object $item, string $token): bool
+	{
+		if (trim($token) === '') {
+			return false;
+		}
+
+		$db = $this->getDatabase();
+		$now = Factory::getDate()->toSql();
+		$tokenHash = hash('sha256', $token);
+		$itemId = (int) $item->id;
+		$query = $db->getQuery(true)
+			->update($db->quoteName('#__downloadtracker_tokens'))
+			->set($db->quoteName('used_count') . ' = ' . $db->quoteName('used_count') . ' + 1')
+			->set($db->quoteName('last_used_at') . ' = :last_used_at')
+			->where($db->quoteName('item_id') . ' = :item_id')
+			->where($db->quoteName('token_hash') . ' = :token_hash')
+			->where($db->quoteName('state') . ' = 1')
+			->where('(' . $db->quoteName('expires_at') . ' IS NULL OR ' . $db->quoteName('expires_at') . ' >= :expires_at)')
+			->where('(' . $db->quoteName('max_uses') . ' IS NULL OR ' . $db->quoteName('used_count') . ' < ' . $db->quoteName('max_uses') . ')')
+			->bind(':last_used_at', $now)
+			->bind(':item_id', $itemId, ParameterType::INTEGER)
+			->bind(':token_hash', $tokenHash)
+			->bind(':expires_at', $now);
+
+		$db->setQuery($query);
+		$db->execute();
+
+		return $db->getAffectedRows() === 1;
 	}
 
 	public function logDownload(object $item, string $requestedAlias, string $status = 'redirected', ?string $target = null): void
