@@ -15,5 +15,14 @@
 		</field>
 		<field name="expires_at" type="calendar" label="COM_DOWNLOADTRACKER_FIELD_EXPIRES_AT_LABEL" format="%Y-%m-%d %H:%M:%S" showtime="true" filter="user_utc" />
 		<field name="max_uses" type="number" label="COM_DOWNLOADTRACKER_FIELD_MAX_USES_LABEL" min="1" step="1" filter="integer" />
+		<field
+			name="send_email"
+			type="checkbox"
+			label="COM_DOWNLOADTRACKER_FIELD_SEND_EMAIL_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_SEND_EMAIL_DESC"
+			value="1"
+			default="0"
+			filter="integer"
+		/>
 	</fieldset>
 </form>

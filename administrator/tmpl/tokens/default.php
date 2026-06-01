@@ -70,6 +70,8 @@ $hasActiveFilters = !empty($this->activeFilters);
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EXPIRES_AT', 'a.expires_at', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_TOKEN_USES'); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_LAST_USED_AT', 'a.last_used_at', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EMAIL_STATUS', 'a.last_email_status', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EMAILED_AT', 'a.emailed_at', $listDirn, $listOrder); ?></th>
 					<th scope="col" class="w-15"><?php echo HTMLHelper::_('searchtools.sort', 'JDATE', 'a.created', $listDirn, $listOrder); ?></th>
 				</tr>
 			</thead>
@@ -96,6 +98,21 @@ $hasActiveFilters = !empty($this->activeFilters);
 							<?php echo $item->max_uses === null ? Text::_('COM_DOWNLOADTRACKER_UNLIMITED') : (int) $item->max_uses; ?>
 						</td>
 						<td><?php echo $item->last_used_at ? HTMLHelper::_('date', $item->last_used_at, Text::_('COM_DOWNLOADTRACKER_DATE_FORMAT_LOG'), true) : ''; ?></td>
+						<td>
+							<?php echo $this->escape((string) $item->last_email_status); ?>
+							<?php if ((int) $item->email_count > 0) : ?>
+								<small class="text-muted d-block"><?php echo Text::sprintf('COM_DOWNLOADTRACKER_EMAIL_COUNT_LABEL', (int) $item->email_count); ?></small>
+							<?php endif; ?>
+							<?php if (trim((string) $item->last_email_error) !== '') : ?>
+								<small class="text-muted d-block"><?php echo $this->escape((string) $item->last_email_error); ?></small>
+							<?php endif; ?>
+						</td>
+						<td>
+							<?php echo $item->emailed_at ? HTMLHelper::_('date', $item->emailed_at, Text::_('COM_DOWNLOADTRACKER_DATE_FORMAT_LOG'), true) : ''; ?>
+							<?php if (trim((string) $item->emailed_to) !== '') : ?>
+								<small class="text-muted d-block"><?php echo $this->escape((string) $item->emailed_to); ?></small>
+							<?php endif; ?>
+						</td>
 						<td><?php echo $item->created ? HTMLHelper::_('date', $item->created, Text::_('DATE_FORMAT_LC4'), true) : ''; ?></td>
 					</tr>
 				<?php endforeach; ?>
