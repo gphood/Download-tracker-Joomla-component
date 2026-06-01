@@ -116,6 +116,11 @@ if ($downloadMenuItemId > 0) {
 									); ?>
 								</span>
 							<?php endif; ?>
+							<?php if ((int) $item->requires_token === 1) : ?>
+								<div class="mt-1">
+									<span class="badge bg-warning text-dark"><?php echo Text::_('COM_DOWNLOADTRACKER_BADGE_TOKEN_REQUIRED'); ?></span>
+								</div>
+							<?php endif; ?>
 						</td>
 						<td class="text-center"><?php echo ((int) $item->is_latest === 1) ? Text::_('JYES') : Text::_('JNO'); ?></td>
 						<td class="text-center"><?php echo HTMLHelper::_('jgrid.published', $item->state, $i, 'items.', true, 'cb'); ?></td>

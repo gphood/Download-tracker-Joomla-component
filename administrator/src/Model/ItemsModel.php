@@ -25,7 +25,7 @@ class ItemsModel extends ListModel
 			$config['filter_fields'] = [
 				'id', 'a.id', 'title', 'a.title', 'alias', 'a.alias', 'product_title', 'p.title',
 				'edition', 'a.edition', 'version', 'a.version', 'is_latest', 'a.is_latest',
-				'state', 'a.state', 'created', 'a.created', 'ordering', 'a.ordering',
+				'requires_token', 'a.requires_token', 'state', 'a.state', 'created', 'a.created', 'ordering', 'a.ordering',
 			];
 		}
 
@@ -48,7 +48,7 @@ class ItemsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.product_id', 'a.title', 'a.alias', 'a.edition', 'a.version', 'a.is_latest', 'a.state', 'a.created']))
+			->select($db->quoteName(['a.id', 'a.product_id', 'a.title', 'a.alias', 'a.edition', 'a.version', 'a.is_latest', 'a.requires_token', 'a.state', 'a.created']))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_items', 'a'))
 			->leftJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('a.product_id'));

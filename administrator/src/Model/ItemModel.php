@@ -53,6 +53,7 @@ class ItemModel extends AdminModel
 		$alias = (string) ($data['alias'] ?? '');
 		$data['alias'] = $this->prepareAlias($alias !== '' ? $alias : (string) ($data['title'] ?? ''), (int) ($data['id'] ?? 0));
 		$data['is_latest'] = empty($data['is_latest']) ? 0 : 1;
+		$data['requires_token'] = empty($data['requires_token']) ? 0 : 1;
 		$data['source_type'] = in_array((string) ($data['source_type'] ?? 'external'), ['external', 'private_file'], true)
 			? (string) $data['source_type']
 			: 'external';
