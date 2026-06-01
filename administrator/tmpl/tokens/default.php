@@ -25,20 +25,30 @@ $hasActiveFilters = !empty($this->activeFilters);
 		<h2 class="h4 alert-heading"><?php echo Text::_('COM_DOWNLOADTRACKER_TOKEN_CREATED_HEADING'); ?></h2>
 		<p><?php echo Text::_('COM_DOWNLOADTRACKER_TOKEN_CREATED_MESSAGE'); ?></p>
 		<p><strong><?php echo Text::_('COM_DOWNLOADTRACKER_FIELD_TOKEN_LABEL'); ?></strong></p>
-		<p><code><?php echo $this->escape((string) $this->generatedToken['raw_token']); ?></code></p>
+		<div class="com-downloadtracker-token-notice__value-row">
+			<code class="com-downloadtracker-token-notice__value"><?php echo $this->escape((string) $this->generatedToken['raw_token']); ?></code>
+			<button
+				type="button"
+				class="btn btn-sm btn-outline-secondary com-downloadtracker-token-notice__copy js-downloadtracker-copy-token"
+				data-download-token="<?php echo $this->escape((string) $this->generatedToken['raw_token']); ?>"
+			>
+				<?php echo Text::_('COM_DOWNLOADTRACKER_COPY_TOKEN'); ?>
+			</button>
+		</div>
 		<?php if (!empty($this->generatedToken['download_url'])) : ?>
 			<p><strong><?php echo Text::_('COM_DOWNLOADTRACKER_FIELD_PROTECTED_DOWNLOAD_URL_LABEL'); ?></strong></p>
-			<div class="d-flex gap-2 align-items-center">
-				<code><?php echo $this->escape((string) $this->generatedToken['download_url']); ?></code>
+			<div class="com-downloadtracker-token-notice__value-row">
+				<code class="com-downloadtracker-token-notice__value"><?php echo $this->escape((string) $this->generatedToken['download_url']); ?></code>
 				<button
 					type="button"
-					class="btn btn-sm btn-outline-secondary js-downloadtracker-copy-url"
+					class="btn btn-sm btn-outline-secondary com-downloadtracker-token-notice__copy js-downloadtracker-copy-url"
 					data-download-url="<?php echo $this->escape((string) $this->generatedToken['download_url']); ?>"
 				>
 					<?php echo Text::_('COM_DOWNLOADTRACKER_COPY_URL'); ?>
 				</button>
 			</div>
 		<?php endif; ?>
+		<p class="com-downloadtracker-token-notice__note"><?php echo Text::_('COM_DOWNLOADTRACKER_TOKEN_CREATED_ONCE_NOTE'); ?></p>
 	</div>
 <?php endif; ?>
 <form action="<?php echo Route::_('index.php?option=com_downloadtracker&view=tokens'); ?>" method="post" name="adminForm" id="adminForm">
@@ -102,12 +112,12 @@ $hasActiveFilters = !empty($this->activeFilters);
 </form>
 <script>
 document.addEventListener('click', function (event) {
-	var button = event.target.closest('.js-downloadtracker-copy-url');
+	var button = event.target.closest('.js-downloadtracker-copy-url, .js-downloadtracker-copy-token');
 
 	if (!button || !navigator.clipboard) {
 		return;
 	}
 
-	navigator.clipboard.writeText(button.getAttribute('data-download-url'));
+	navigator.clipboard.writeText(button.getAttribute('data-download-url') || button.getAttribute('data-download-token'));
 });
 </script>

@@ -3,6 +3,53 @@
 	overflow-wrap: anywhere;
 }
 
+.com-downloadtracker-token-notice__value-row {
+	align-items: stretch;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	margin-block: .35rem .85rem;
+}
+
+.com-downloadtracker-token-notice__value {
+	background: #f8fafc;
+	border: 1px solid #cbd5e1;
+	border-radius: .35rem;
+	color: #111827;
+	display: block;
+	flex: 1 1 22rem;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	font-size: .875rem;
+	line-height: 1.45;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	padding: .6rem .75rem;
+	white-space: normal;
+	word-break: break-word;
+}
+
+.com-downloadtracker-token-notice__copy {
+	flex: 0 0 auto;
+	min-height: 2.5rem;
+}
+
+.com-downloadtracker-token-notice__note {
+	color: #1f2937;
+	margin-bottom: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+	.com-downloadtracker-token-notice__value {
+		background: #f8fafc;
+		border-color: #94a3b8;
+		color: #111827;
+	}
+
+	.com-downloadtracker-token-notice__note {
+		color: #111827;
+	}
+}
+
 .com-downloadtracker-logs-table {
 	font-size: .78rem;
 	line-height: 1.25;

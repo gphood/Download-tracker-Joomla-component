@@ -31,6 +31,9 @@ class HtmlView extends BaseHtmlView
 		$this->generatedToken = $this->getGeneratedTokenNotice();
 		$this->addToolbar();
 
+		Factory::getApplication()->getDocument()->getWebAssetManager()
+			->registerAndUseStyle('com_downloadtracker.admin', 'media/com_downloadtracker/css/admin.css');
+
 		parent::display($tpl);
 	}
 
