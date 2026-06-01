@@ -17,12 +17,15 @@
 		<field name="max_uses" type="number" label="COM_DOWNLOADTRACKER_FIELD_MAX_USES_LABEL" min="1" step="1" filter="integer" />
 		<field
 			name="send_email"
-			type="checkbox"
+			type="radio"
+			layout="joomla.form.field.radio.switcher"
 			label="COM_DOWNLOADTRACKER_FIELD_SEND_EMAIL_LABEL"
 			description="COM_DOWNLOADTRACKER_FIELD_SEND_EMAIL_DESC"
-			value="1"
 			default="0"
 			filter="integer"
-		/>
+		>
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
 	</fieldset>
 </form>

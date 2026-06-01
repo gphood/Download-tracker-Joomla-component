@@ -16,7 +16,6 @@ namespace GrantHood\Component\DownloadTracker\Administrator\Model;
 use GrantHood\Component\DownloadTracker\Administrator\Helper\DownloadTrackerHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Log\Log;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\Database\ParameterType;
 use Joomla\Utilities\ArrayHelper;
@@ -62,21 +61,12 @@ class TokenModel extends AdminModel
 
 	public function save($data): bool
 	{
+		$app = Factory::getApplication();
 		$isNew = empty($data['id']);
-		$postedJform = Factory::getApplication()->getInput()->post->get('jform', [], 'array');
+		$postedJform = $app->getInput()->post->get('jform', [], 'array');
 		$filteredSendEmail = (int) ($data['send_email'] ?? 0);
 		$postedSendEmail = (int) ($postedJform['send_email'] ?? 0);
 		$sendEmail = $isNew && ($filteredSendEmail === 1 || $postedSendEmail === 1);
-
-		$this->logTokenEmailDebug(
-			sprintf(
-				'Token email flag: raw=%d filtered=%d isNew=%d sendEmail=%d',
-				$postedSendEmail,
-				$filteredSendEmail,
-				$isNew ? 1 : 0,
-				$sendEmail ? 1 : 0
-			)
-		);
 
 		$data['item_id'] = (int) ($data['item_id'] ?? 0);
 		$data['state'] = (int) ($data['state'] ?? 1);
@@ -111,14 +101,13 @@ class TokenModel extends AdminModel
 		}
 
 		$saved = parent::save($data);
+		$tokenId = (int) $this->getState($this->getName() . '.id');
 
 		if ($saved && $isNew) {
-			$tokenId = (int) $this->getState($this->getName() . '.id');
 			$generated = $this->getGeneratedTokenDetails($tokenId, $data['item_id'], $rawToken, (string) $data['token_prefix']);
 			$this->storeGeneratedTokenNotice($generated);
 
 			if ($sendEmail) {
-				$this->logTokenEmailDebug(sprintf('Entering token email send for token id %d.', $tokenId));
 				$this->sendGeneratedTokenEmail($tokenId, $generated, $data);
 			}
 		}
@@ -266,15 +255,6 @@ class TokenModel extends AdminModel
 		$message = trim($message);
 
 		return mb_substr($message !== '' ? $message : Text::_('COM_DOWNLOADTRACKER_ERROR_DOWNLOAD_EMAIL_FAILED'), 0, 1000);
-	}
-
-	private function logTokenEmailDebug(string $message): void
-	{
-		if (!Factory::getApplication()->get('debug')) {
-			return;
-		}
-
-		Log::add($message, Log::DEBUG, 'com_downloadtracker');
 	}
 
 	private function getDownloadItem(int $itemId): ?object
