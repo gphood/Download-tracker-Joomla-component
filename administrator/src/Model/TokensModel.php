@@ -27,7 +27,8 @@ class TokensModel extends ListModel
 				'customer_email', 'a.customer_email', 'token_prefix', 'a.token_prefix', 'state', 'a.state',
 				'expires_at', 'a.expires_at', 'used_count', 'a.used_count', 'max_uses', 'a.max_uses',
 				'last_used_at', 'a.last_used_at', 'emailed_at', 'a.emailed_at', 'email_count', 'a.email_count',
-				'last_email_status', 'a.last_email_status', 'created', 'a.created',
+				'last_email_status', 'a.last_email_status', 'source', 'a.source', 'source_reference', 'a.source_reference',
+				'created', 'a.created',
 			];
 		}
 
@@ -48,7 +49,7 @@ class TokensModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.label', 'a.customer_email', 'a.token_prefix', 'a.state', 'a.expires_at', 'a.max_uses', 'a.used_count', 'a.last_used_at', 'a.emailed_at', 'a.emailed_to', 'a.email_count', 'a.last_email_status', 'a.last_email_error', 'a.created']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.label', 'a.customer_email', 'a.token_prefix', 'a.state', 'a.expires_at', 'a.max_uses', 'a.used_count', 'a.last_used_at', 'a.emailed_at', 'a.emailed_to', 'a.email_count', 'a.last_email_status', 'a.last_email_error', 'a.source', 'a.source_reference', 'a.created']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('i.alias', 'item_alias'))
 			->from($db->quoteName('#__downloadtracker_tokens', 'a'))
@@ -67,6 +68,8 @@ class TokensModel extends ListModel
 					. $db->quoteName('a.label') . ' LIKE :search'
 					. ' OR ' . $db->quoteName('a.customer_email') . ' LIKE :search'
 					. ' OR ' . $db->quoteName('a.token_prefix') . ' LIKE :search'
+					. ' OR ' . $db->quoteName('a.source') . ' LIKE :search'
+					. ' OR ' . $db->quoteName('a.source_reference') . ' LIKE :search'
 					. ' OR ' . $db->quoteName('i.title') . ' LIKE :search'
 					. ' OR ' . $db->quoteName('i.alias') . ' LIKE :search'
 					. ')'

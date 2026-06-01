@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_tokens` (
 	`email_count` int unsigned NOT NULL DEFAULT 0,
 	`last_email_status` varchar(50) NULL,
 	`last_email_error` text NULL,
+	`source` varchar(50) NULL,
+	`source_reference` varchar(255) NULL,
 	`created` datetime NULL,
 	`created_by` int unsigned NOT NULL DEFAULT 0,
 	`modified` datetime NULL,
@@ -72,7 +74,8 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_tokens` (
 	UNIQUE KEY `idx_token_hash` (`token_hash`),
 	KEY `idx_item_id` (`item_id`),
 	KEY `idx_state` (`state`),
-	KEY `idx_expires_at` (`expires_at`)
+	KEY `idx_expires_at` (`expires_at`),
+	KEY `idx_source_reference` (`source`, `source_reference`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
