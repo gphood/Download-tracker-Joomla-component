@@ -40,10 +40,43 @@ class ItemTable extends Table
 			return false;
 		}
 
-		if (trim((string) $this->target_url) === '') {
+		$sourceType = (string) ($this->source_type ?: 'external');
+
+		if (!in_array($sourceType, ['external', 'private_file'], true)) {
+			$sourceType = 'external';
+		}
+
+		$this->source_type = $sourceType;
+
+		if ($sourceType === 'external' && trim((string) $this->target_url) === '') {
 			$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_TARGET_URL_REQUIRED'));
 
 			return false;
+		}
+
+		if ($sourceType === 'private_file') {
+			$privateFile = trim(str_replace('\\', '/', (string) $this->private_file));
+			$segments = array_filter(explode('/', $privateFile), static fn ($segment) => $segment !== '');
+
+			if ($privateFile === '') {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_PRIVATE_FILE_REQUIRED'));
+
+				return false;
+			}
+
+			if (
+				str_starts_with($privateFile, '/')
+				|| preg_match('#^[a-zA-Z]:/#', $privateFile)
+				|| str_contains($privateFile, "\0")
+				|| str_contains($privateFile, '://')
+				|| in_array('..', $segments, true)
+			) {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_PRIVATE_FILE_INVALID'));
+
+				return false;
+			}
+
+			$this->private_file = implode('/', $segments);
 		}
 
 		return true;

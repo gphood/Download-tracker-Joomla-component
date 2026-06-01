@@ -14,12 +14,10 @@ namespace GrantHood\Component\DownloadTracker\Administrator\Controller;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
-use Joomla\Registry\Registry;
 
 class LogsController extends BaseController
 {
@@ -50,60 +48,6 @@ class LogsController extends BaseController
 			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_NO_LOGS_SELECTED'), 'warning');
 		} else {
 			$app->enqueueMessage(Text::plural('COM_DOWNLOADTRACKER_N_LOGS_DELETED', $deleted), 'message');
-		}
-
-		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
-	}
-
-	public function dismissGeolocationSetupNotice(): void
-	{
-		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
-
-		$app = Factory::getApplication();
-
-		if (!$app->getIdentity()->authorise('core.manage', 'com_downloadtracker')) {
-			throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-		}
-
-		$params = ComponentHelper::getParams('com_downloadtracker');
-		$params->set('show_geolocation_setup_notice', 0);
-		$this->saveComponentParams($params);
-
-		$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_GEOLOCATION_SETUP_NOTICE_DISMISSED'), 'message');
-		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
-	}
-
-	public function enrichLocations(): void
-	{
-		Session::checkToken() or die(Text::_('JINVALID_TOKEN'));
-
-		$app = Factory::getApplication();
-
-		if (!$app->getIdentity()->authorise('core.manage', 'com_downloadtracker')) {
-			throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-		}
-
-		/** @var \GrantHood\Component\DownloadTracker\Administrator\Model\LogsModel $model */
-		$model = $this->getModel('Logs', 'Administrator');
-		$stats = $model->enrichLocations();
-
-		if ($stats['error'] === 'provider') {
-			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IP_LOCATION_PROVIDER_DISABLED'), 'warning');
-		} elseif ($stats['error'] === 'token') {
-			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_WARNING_IPINFO_LITE_TOKEN_MISSING_ENABLED'), 'warning');
-		} elseif ((int) $stats['processed'] === 0) {
-			$app->enqueueMessage(Text::_('COM_DOWNLOADTRACKER_IP_LOCATION_NO_LOGS'), 'message');
-		} else {
-			$app->enqueueMessage(
-				Text::sprintf(
-					'COM_DOWNLOADTRACKER_IP_LOCATION_ENRICHED',
-					(int) $stats['processed'],
-					(int) $stats['success'],
-					(int) $stats['failed'],
-					(int) $stats['skipped']
-				),
-				'message'
-			);
 		}
 
 		$this->setRedirect(Route::_('index.php?option=com_downloadtracker&view=logs', false));
@@ -206,18 +150,4 @@ class LogsController extends BaseController
 		fputcsv($handle, $row, ',', '"', '', "\r\n");
 	}
 
-	private function saveComponentParams(Registry $params): void
-	{
-		$db = Factory::getContainer()->get('DatabaseDriver');
-		$paramsJson = $params->toString('JSON');
-		$query = $db->getQuery(true)
-			->update($db->quoteName('#__extensions'))
-			->set($db->quoteName('params') . ' = :params')
-			->where($db->quoteName('type') . ' = ' . $db->quote('component'))
-			->where($db->quoteName('element') . ' = ' . $db->quote('com_downloadtracker'))
-			->bind(':params', $paramsJson);
-
-		$db->setQuery($query);
-		$db->execute();
-	}
 }

@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config addfieldprefix="GrantHood\Component\DownloadTracker\Administrator\Field">
 	<fieldset
+		name="downloads"
+		label="COM_DOWNLOADTRACKER_CONFIG_DOWNLOADS_LABEL"
+		description="COM_DOWNLOADTRACKER_CONFIG_DOWNLOADS_DESC"
+	>
+		<field
+			name="private_downloads_path"
+			type="text"
+			label="COM_DOWNLOADTRACKER_FIELD_PRIVATE_DOWNLOADS_PATH_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_PRIVATE_DOWNLOADS_PATH_DESC"
+			filter="string"
+			size="80"
+		/>
+		<field
+			name="download_menu_item"
+			type="menuitem"
+			label="COM_DOWNLOADTRACKER_FIELD_DOWNLOAD_MENU_ITEM_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_DOWNLOAD_MENU_ITEM_DESC"
+			client="site"
+			clientid="0"
+			filter="integer"
+		/>
+		<field
+			name="download_menu_help"
+			type="downloadmenuhelp"
+		/>
+	</fieldset>
+	<fieldset
 		name="geolocation"
 		label="COM_DOWNLOADTRACKER_CONFIG_GEOLOCATION_LABEL"
 		description="COM_DOWNLOADTRACKER_CONFIG_GEOLOCATION_DESC"
@@ -34,24 +61,12 @@
 			type="number"
 			label="COM_DOWNLOADTRACKER_FIELD_IP_LOCATION_BATCH_SIZE_LABEL"
 			description="COM_DOWNLOADTRACKER_FIELD_IP_LOCATION_BATCH_SIZE_DESC"
-			default="25"
+			default="10"
 			min="1"
-			max="100"
+			max="25"
 			step="1"
 			filter="integer"
 		/>
-		<field
-			name="show_geolocation_setup_notice"
-			type="radio"
-			label="COM_DOWNLOADTRACKER_FIELD_SHOW_GEOLOCATION_SETUP_NOTICE_LABEL"
-			description="COM_DOWNLOADTRACKER_FIELD_SHOW_GEOLOCATION_SETUP_NOTICE_DESC"
-			default="1"
-			filter="integer"
-			layout="joomla.form.field.radio.switcher"
-		>
-			<option value="1">JYES</option>
-			<option value="0">JNO</option>
-		</field>
 		<field
 			name="ipinfo_lite_attribution"
 			type="spacer"

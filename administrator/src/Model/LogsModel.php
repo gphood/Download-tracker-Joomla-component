@@ -136,12 +136,14 @@ class LogsModel extends ListModel
 		return $db->loadObjectList();
 	}
 
-	public function enrichLocations(): array
+	public function enrichLocations(bool $automatic = false): array
 	{
 		$params = ComponentHelper::getParams('com_downloadtracker');
 		$provider = (string) $params->get('ip_geolocation_provider', 'none');
 		$token = trim((string) $params->get('ipinfo_lite_token', ''));
-		$batchSize = max(1, min(100, (int) $params->get('ip_location_batch_size', 25)));
+		$maxBatchSize = $automatic ? 25 : 100;
+		$defaultBatchSize = $automatic ? 10 : 25;
+		$batchSize = max(1, min($maxBatchSize, (int) $params->get('ip_location_batch_size', $defaultBatchSize)));
 
 		if ($provider !== 'ipinfo_lite') {
 			return $this->getEmptyLocationStats('provider');

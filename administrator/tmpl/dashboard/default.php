@@ -9,6 +9,7 @@
 
 \defined('_JEXEC') or die;
 
+use GrantHood\Component\DownloadTracker\Administrator\Helper\DownloadTrackerHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
@@ -49,6 +50,8 @@ $formatReferrer = static function (string $referrer) use ($siteHost): string {
 };
 ?>
 <div class="com-downloadtracker-dashboard">
+	<?php echo DownloadTrackerHelper::renderSefWarning(); ?>
+
 	<div class="row">
 		<?php foreach ($summaryCards as $key => $card) : ?>
 			<div class="col-sm-6 col-xl-3 mb-3">

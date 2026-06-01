@@ -9,7 +9,19 @@
 		<field name="alias" type="text" label="COM_DOWNLOADTRACKER_FIELD_ALIAS_LABEL" maxlength="255" hint="COM_DOWNLOADTRACKER_FIELD_ALIAS_HINT" />
 		<field name="edition" type="text" label="COM_DOWNLOADTRACKER_FIELD_EDITION_LABEL" maxlength="50" />
 		<field name="version" type="text" label="COM_DOWNLOADTRACKER_FIELD_VERSION_LABEL" maxlength="50" />
-		<field name="target_url" type="url" label="COM_DOWNLOADTRACKER_FIELD_TARGET_URL_LABEL" required="true" filter="url" />
+		<field name="source_type" type="radio" label="COM_DOWNLOADTRACKER_FIELD_SOURCE_TYPE_LABEL" default="external" validate="options">
+			<option value="external">COM_DOWNLOADTRACKER_OPTION_SOURCE_EXTERNAL</option>
+			<option value="private_file">COM_DOWNLOADTRACKER_OPTION_SOURCE_PRIVATE_FILE</option>
+		</field>
+		<field name="target_url" type="url" label="COM_DOWNLOADTRACKER_FIELD_TARGET_URL_LABEL" filter="url" showon="source_type:external" />
+		<field
+			name="private_file"
+			type="text"
+			label="COM_DOWNLOADTRACKER_FIELD_PRIVATE_FILE_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_PRIVATE_FILE_DESC"
+			filter="string"
+			showon="source_type:private_file"
+		/>
 		<field name="is_latest" type="radio" label="COM_DOWNLOADTRACKER_FIELD_IS_LATEST_LABEL" layout="joomla.form.field.radio.switcher" default="0">
 			<option value="0">JNO</option>
 			<option value="1">JYES</option>

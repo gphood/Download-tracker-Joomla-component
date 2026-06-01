@@ -23,7 +23,7 @@ class DownloadModel extends BaseDatabaseModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['i.id', 'i.product_id', 'i.title', 'i.alias', 'i.edition', 'i.version', 'i.target_url']))
+			->select($db->quoteName(['i.id', 'i.product_id', 'i.title', 'i.alias', 'i.edition', 'i.version', 'i.source_type', 'i.target_url', 'i.private_file']))
 			->from($db->quoteName('#__downloadtracker_items', 'i'))
 			->innerJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('i.product_id'))
 			->where($db->quoteName('i.alias') . ' = :alias')
@@ -37,7 +37,7 @@ class DownloadModel extends BaseDatabaseModel
 		return $item ?: null;
 	}
 
-	public function logDownload(object $item, string $requestedAlias): void
+	public function logDownload(object $item, string $requestedAlias, string $status = 'redirected', ?string $target = null): void
 	{
 		$app = Factory::getApplication();
 		$server = $app->getInput()->server;
@@ -59,8 +59,8 @@ class DownloadModel extends BaseDatabaseModel
 			'is_bot' => $this->isBotUserAgent($userAgent) ? 1 : 0,
 			'referrer' => $referrer,
 			'requested_url' => $requestedUrl,
-			'target_url' => (string) $item->target_url,
-			'status' => 'redirected',
+			'target_url' => $target ?? (string) $item->target_url,
+			'status' => $status,
 		];
 
 		$db->insertObject('#__downloadtracker_logs', $log);
