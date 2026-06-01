@@ -15,7 +15,10 @@ namespace GrantHood\Component\DownloadTracker\Administrator\Helper;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
 
 class DownloadTrackerHelper
 {
@@ -59,6 +62,58 @@ class DownloadTrackerHelper
 		}
 
 		return $root . $path;
+	}
+
+	public static function buildPublicDownloadUrlForAlias(string $alias): string
+	{
+		$downloadMenuItemId = self::getConfiguredDownloadMenuItemId();
+		$downloadMenuPath = '';
+
+		if ($downloadMenuItemId > 0) {
+			$db = Factory::getContainer()->get(DatabaseInterface::class);
+			$query = $db->getQuery(true)
+				->select($db->quoteName(['path', 'alias']))
+				->from($db->quoteName('#__menu'))
+				->where($db->quoteName('id') . ' = :id')
+				->where($db->quoteName('client_id') . ' = 0')
+				->bind(':id', $downloadMenuItemId, ParameterType::INTEGER);
+
+			$db->setQuery($query);
+			$downloadMenuItem = $db->loadObject();
+
+			if ($downloadMenuItem) {
+				$downloadMenuPath = trim((string) ($downloadMenuItem->path ?: $downloadMenuItem->alias), '/');
+			}
+		}
+
+		if ($downloadMenuPath !== '') {
+			return self::buildPublicDownloadUrl($alias, $downloadMenuItemId, $downloadMenuPath);
+		}
+
+		return rtrim(Uri::root(), '/') . '/index.php?option=com_downloadtracker&task=download.redirect&alias=' . rawurlencode($alias);
+	}
+
+	public static function getConfiguredDownloadMenuItemId(): int
+	{
+		$value = ComponentHelper::getParams('com_downloadtracker')->get('download_menu_item', 0);
+
+		if (is_numeric($value)) {
+			return (int) $value;
+		}
+
+		if (is_array($value)) {
+			return (int) ($value['id'] ?? $value['value'] ?? reset($value));
+		}
+
+		if (is_object($value)) {
+			return (int) ($value->id ?? $value->value ?? 0);
+		}
+
+		if (preg_match('/^\d+/', (string) $value, $matches)) {
+			return (int) $matches[0];
+		}
+
+		return 0;
 	}
 
 	public static function renderSefWarning(): string

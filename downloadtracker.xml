@@ -54,6 +54,9 @@
 			<menu link="option=com_downloadtracker&amp;view=items" view="items" img="class:download">
 				COM_DOWNLOADTRACKER_ITEMS
 			</menu>
+			<menu link="option=com_downloadtracker&amp;view=tokens" view="tokens" img="class:key">
+				COM_DOWNLOADTRACKER_TOKENS
+			</menu>
 			<menu link="option=com_downloadtracker&amp;view=logs" view="logs" img="class:list">
 				COM_DOWNLOADTRACKER_LOGS
 			</menu>
