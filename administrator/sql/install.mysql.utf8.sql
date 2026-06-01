@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_items` (
 	`alias` varchar(255) NOT NULL,
 	`edition` varchar(50) NULL,
 	`version` varchar(50) NULL,
+	`source_type` varchar(20) NOT NULL DEFAULT 'external',
 	`target_url` text NOT NULL,
+	`private_file` varchar(1024) NULL,
+	`requires_token` tinyint NOT NULL DEFAULT 0,
 	`is_latest` tinyint NOT NULL DEFAULT 0,
 	`state` tinyint NOT NULL DEFAULT 1,
 	`notes` text NULL,
@@ -41,6 +44,32 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_items` (
 	KEY `idx_latest` (`is_latest`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `#__downloadtracker_tokens` (
+	`id` bigint NOT NULL AUTO_INCREMENT,
+	`item_id` int NOT NULL,
+	`label` varchar(255) NULL,
+	`token_hash` char(64) NOT NULL,
+	`token_prefix` varchar(16) NULL,
+	`state` tinyint NOT NULL DEFAULT 1,
+	`expires_at` datetime NULL,
+	`max_uses` int unsigned NULL,
+	`used_count` int unsigned NOT NULL DEFAULT 0,
+	`customer_email` varchar(320) NULL,
+	`note` text NULL,
+	`last_used_at` datetime NULL,
+	`created` datetime NULL,
+	`created_by` int unsigned NOT NULL DEFAULT 0,
+	`modified` datetime NULL,
+	`modified_by` int unsigned NOT NULL DEFAULT 0,
+	`checked_out` int unsigned NULL,
+	`checked_out_time` datetime NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `idx_token_hash` (`token_hash`),
+	KEY `idx_item_id` (`item_id`),
+	KEY `idx_state` (`state`),
+	KEY `idx_expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`id` bigint NOT NULL AUTO_INCREMENT,
 	`item_id` int NOT NULL,
@@ -56,6 +85,9 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`referrer` text NULL,
 	`requested_url` text NULL,
 	`target_url` text NOT NULL,
+	`token_id` bigint NULL,
+	`token_prefix` varchar(16) NULL,
+	`token_status` varchar(30) NULL,
 	`status` varchar(20) NOT NULL DEFAULT 'redirected',
 	`ip_classification` varchar(50) NULL,
 	`country_code` varchar(10) NULL,
@@ -75,5 +107,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	KEY `idx_downloaded_at` (`downloaded_at`),
 	KEY `idx_is_bot` (`is_bot`),
 	KEY `idx_status` (`status`),
+	KEY `idx_token_id` (`token_id`),
+	KEY `idx_token_status` (`token_status`),
 	KEY `idx_ip_location_checked_at` (`ip_location_checked_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
