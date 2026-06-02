@@ -141,10 +141,15 @@ class DownloadFulfilmentService
 	private function sendTokenEmail(int $tokenId, string $email, string $itemTitle, string $downloadUrl, array $request): array
 	{
 		$app = Factory::getApplication();
-		$itemTitle = $itemTitle !== '' ? $itemTitle : Text::_('COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_TITLE_FALLBACK');
+		$this->loadEmailLanguageStrings();
+
+		$itemTitle = $itemTitle !== '' ? $itemTitle : $this->translateOrFallback('COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_TITLE_FALLBACK', 'your download');
 
 		if ($downloadUrl === '') {
-			$message = Text::_('COM_DOWNLOADTRACKER_ERROR_PROTECTED_DOWNLOAD_URL_UNAVAILABLE');
+			$message = $this->translateOrFallback(
+				'COM_DOWNLOADTRACKER_ERROR_PROTECTED_DOWNLOAD_URL_UNAVAILABLE',
+				'The protected download URL could not be generated.'
+			);
 			$this->updateEmailAudit($tokenId, 'failed', $email, $message);
 
 			return ['sent' => false, 'status' => 'failed', 'error' => $message];
@@ -159,18 +164,11 @@ class DownloadFulfilmentService
 				$mailer->setSender([$mailFrom, $fromName]);
 			}
 
-			$expiry = !empty($request['expires_at']) ? (string) $request['expires_at'] : Text::_('COM_DOWNLOADTRACKER_EMAIL_NO_EXPIRY');
-			$maxUses = !empty($request['max_uses']) ? (string) (int) $request['max_uses'] : Text::_('COM_DOWNLOADTRACKER_UNLIMITED');
+			$expiry = !empty($request['expires_at']) ? (string) $request['expires_at'] : $this->translateOrFallback('COM_DOWNLOADTRACKER_EMAIL_NO_EXPIRY', 'No expiry date');
+			$maxUses = !empty($request['max_uses']) ? (string) (int) $request['max_uses'] : $this->translateOrFallback('COM_DOWNLOADTRACKER_UNLIMITED', 'Unlimited');
 			$supportName = $fromName !== '' ? $fromName : (string) $app->get('sitename', '');
-			$subject = Text::sprintf('COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_SUBJECT', $itemTitle);
-			$body = Text::sprintf(
-				'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_BODY',
-				$itemTitle,
-				$downloadUrl,
-				$expiry,
-				$maxUses,
-				$supportName
-			);
+			$subject = $this->buildEmailSubject($itemTitle);
+			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $expiry, $maxUses, $supportName);
 
 			$mailer->addRecipient($email);
 			$mailer->setSubject($subject);
@@ -193,9 +191,65 @@ class DownloadFulfilmentService
 		}
 	}
 
+	private function loadEmailLanguageStrings(): void
+	{
+		$language = Factory::getApplication()->getLanguage() ?: Factory::getLanguage();
+		$language->load('com_downloadtracker', JPATH_ADMINISTRATOR, null, true, true);
+		$language->load('com_downloadtracker', JPATH_SITE, null, true, true);
+	}
+
+	private function buildEmailSubject(string $itemTitle): string
+	{
+		$subject = Text::sprintf('COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_SUBJECT', $itemTitle);
+
+		if ($this->isUntranslatedEmailString($subject, 'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_SUBJECT')) {
+			return sprintf('Your download link for %s', $itemTitle);
+		}
+
+		return $subject;
+	}
+
+	private function buildEmailBody(string $itemTitle, string $downloadUrl, string $expiry, string $maxUses, string $supportName): string
+	{
+		$body = Text::sprintf(
+			'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_BODY',
+			$itemTitle,
+			$downloadUrl,
+			$expiry,
+			$maxUses,
+			$supportName
+		);
+
+		if (!$this->isUntranslatedEmailString($body, 'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_BODY')) {
+			return $body;
+		}
+
+		return sprintf(
+			"Thank you for your purchase.\n\nYour secure download link for %s is:\n\n%s\n\nPlease keep this link private. It may expire or stop working after the permitted number of downloads has been reached.\n\nExpiry: %s\nMaximum uses: %s\n\n%s",
+			$itemTitle,
+			$downloadUrl,
+			$expiry,
+			$maxUses,
+			$supportName
+		);
+	}
+
+	private function translateOrFallback(string $key, string $fallback): string
+	{
+		$value = Text::_($key);
+
+		return $value === $key ? $fallback : $value;
+	}
+
+	private function isUntranslatedEmailString(string $value, string $key): bool
+	{
+		return $value === $key || str_starts_with($value, $key);
+	}
+
 	private function updateEmailAudit(int $tokenId, string $status, string $email, ?string $error): void
 	{
 		if ($status === 'sent') {
+			$emailedAt = Factory::getDate()->toSql();
 			$query = $this->db->getQuery(true)
 				->update($this->db->quoteName('#__downloadtracker_tokens'))
 				->set($this->db->quoteName('emailed_at') . ' = :emailed_at')
@@ -204,7 +258,7 @@ class DownloadFulfilmentService
 				->set($this->db->quoteName('last_email_status') . ' = :last_email_status')
 				->set($this->db->quoteName('last_email_error') . ' = NULL')
 				->where($this->db->quoteName('id') . ' = :id')
-				->bind(':emailed_at', Factory::getDate()->toSql())
+				->bind(':emailed_at', $emailedAt)
 				->bind(':emailed_to', $email)
 				->bind(':last_email_status', $status)
 				->bind(':id', $tokenId, ParameterType::INTEGER);
