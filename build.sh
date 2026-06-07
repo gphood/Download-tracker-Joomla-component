@@ -7,6 +7,3 @@ cp downloadtracker.xml administrator/downloadtracker.xml
 mkdir -p dist
 rm -f dist/com_downloadtracker-*.zip
 zip -r "dist/com_downloadtracker-${version}.zip" downloadtracker.xml administrator site media
-rm -f dist/plg_system_downloadtrackerstripe-*.zip
-cd plugins/system/downloadtrackerstripe
-zip -r "../../../dist/plg_system_downloadtrackerstripe-${version}.zip" downloadtrackerstripe.xml services src language
