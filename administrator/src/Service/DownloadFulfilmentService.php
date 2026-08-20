@@ -228,16 +228,8 @@ class DownloadFulfilmentService
 			$supportName = $fromName !== '' ? $fromName : (string) $app->get('sitename', '');
 			$purpose = (string) ($request['purpose'] ?? 'download');
 			$subject = $this->buildEmailSubject($itemTitle, $purpose);
-			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $rawToken, $expiry, $maxUses, $supportName, $purpose);
 			$customerInstructions = trim($customerInstructions);
-
-			if ($customerInstructions !== '') {
-				$instructionsHeading = $this->translateOrFallback(
-					'COM_DOWNLOADTRACKER_EMAIL_CUSTOMER_INSTRUCTIONS_HEADING',
-					'Important installation information:'
-				);
-				$body = rtrim($body) . "\n\n" . $instructionsHeading . "\n" . $customerInstructions;
-			}
+			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $rawToken, $expiry, $maxUses, $supportName, $purpose, $customerInstructions);
 
 			$mailer->addRecipient($email);
 			$mailer->setSubject($subject);
@@ -286,13 +278,25 @@ class DownloadFulfilmentService
 		return $subject;
 	}
 
-	private function buildEmailBody(string $itemTitle, string $downloadUrl, string $rawToken, string $expiry, string $maxUses, string $supportName, string $purpose): string
+	private function buildEmailBody(string $itemTitle, string $downloadUrl, string $rawToken, string $expiry, string $maxUses, string $supportName, string $purpose, string $customerInstructions): string
 	{
+		$instructionsSection = '';
+
+		if ($customerInstructions !== '') {
+			$instructionsHeading = $this->translateOrFallback(
+				'COM_DOWNLOADTRACKER_EMAIL_CUSTOMER_INSTRUCTIONS_HEADING',
+				'Important installation information:'
+			);
+			$instructionsSection = "\n\n" . $instructionsHeading . "\n" . $customerInstructions;
+		}
+
 		if ($purpose === 'update') {
 			$body = Text::sprintf(
 				'COM_DOWNLOADTRACKER_EMAIL_UPDATE_BODY',
+				$instructionsSection,
 				$itemTitle,
 				$downloadUrl,
+				$itemTitle,
 				$rawToken,
 				$supportName
 			);
@@ -302,9 +306,11 @@ class DownloadFulfilmentService
 			}
 
 			return sprintf(
-				"Thank you for your purchase.\n\nYour secure download link for %s is:\n\n%s\n\nYour Joomla update key is:\n\n%s\n\nKeep this key private. Enter it once in System -> Update -> Update Sites on each Joomla site where you install the extension.\n\n%s",
+				"Thank you for your purchase.%s\n\nYour secure download link for %s is:\n\n%s\n\nInstall the downloaded ZIP through System → Install → Extensions.\n\nTo receive future updates through Joomla, enter this update key once under System → Update → Update Sites by opening the update site for %s:\n\n%s\n\nKeep the download link and update key private.\n\n%s",
+				$instructionsSection,
 				$itemTitle,
 				$downloadUrl,
+				$itemTitle,
 				$rawToken,
 				$supportName
 			);
@@ -312,6 +318,7 @@ class DownloadFulfilmentService
 
 		$body = Text::sprintf(
 			'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_BODY',
+			$instructionsSection,
 			$itemTitle,
 			$downloadUrl,
 			$expiry,
@@ -324,7 +331,8 @@ class DownloadFulfilmentService
 		}
 
 		return sprintf(
-			"Thank you for your purchase.\n\nYour secure download link for %s is:\n\n%s\n\nPlease keep this link private. It may expire or stop working after the permitted number of downloads has been reached.\n\nExpiry: %s\nMaximum uses: %s\n\n%s",
+			"Thank you for your purchase.%s\n\nYour secure download link for %s is:\n\n%s\n\nPlease keep this link private. It may expire or stop working after the permitted number of downloads has been reached.\n\nExpiry: %s\nMaximum uses: %s\n\n%s",
+			$instructionsSection,
 			$itemTitle,
 			$downloadUrl,
 			$expiry,
