@@ -1,6 +1,5 @@
 ALTER TABLE `#__downloadtracker_items`
-	ADD COLUMN `customer_instructions` text NULL AFTER `requires_token`,
-	ADD COLUMN `update_enabled` tinyint NOT NULL DEFAULT 0 AFTER `customer_instructions`,
+	ADD COLUMN `update_enabled` tinyint NOT NULL DEFAULT 0 AFTER `requires_token`,
 	ADD COLUMN `update_element` varchar(255) NULL AFTER `update_enabled`,
 	ADD COLUMN `update_type` varchar(20) NULL AFTER `update_element`,
 	ADD COLUMN `update_folder` varchar(100) NULL AFTER `update_type`,
