@@ -79,6 +79,49 @@ class ItemTable extends Table
 			$this->private_file = implode('/', $segments);
 		}
 
+		if ((int) $this->update_enabled === 1) {
+			$updateType = (string) ($this->update_type ?: 'package');
+			$sha256 = strtolower(trim((string) $this->update_sha256));
+
+			if (trim((string) $this->version) === '') {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_VERSION_REQUIRED'));
+
+				return false;
+			}
+
+			if (trim((string) $this->update_element) === '') {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_ELEMENT_REQUIRED'));
+
+				return false;
+			}
+
+			if (!in_array($updateType, ['package', 'component', 'plugin'], true)) {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_TYPE_INVALID'));
+
+				return false;
+			}
+
+			if ($updateType === 'plugin' && trim((string) $this->update_folder) === '') {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_FOLDER_REQUIRED'));
+
+				return false;
+			}
+
+			if (!preg_match('/^[a-f0-9]{64}$/', $sha256)) {
+				$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_SHA256_INVALID'));
+
+				return false;
+			}
+
+			$this->update_type = $updateType;
+			$this->update_client = in_array((string) $this->update_client, ['site', 'administrator'], true)
+				? (string) $this->update_client
+				: 'site';
+			$this->update_sha256 = $sha256;
+			$this->update_targetplatform = trim((string) $this->update_targetplatform) ?: '[56]\\..*';
+			$this->update_php_minimum = trim((string) $this->update_php_minimum) ?: '8.1';
+		}
+
 		return true;
 	}
 }

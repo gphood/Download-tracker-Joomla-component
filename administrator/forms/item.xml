@@ -44,4 +44,32 @@
 		</field>
 		<field name="notes" type="textarea" label="COM_DOWNLOADTRACKER_FIELD_NOTES_LABEL" rows="6" filter="safehtml" />
 	</fieldset>
+	<fieldset name="updates" label="COM_DOWNLOADTRACKER_FIELDSET_UPDATES_LABEL">
+		<field
+			name="update_enabled"
+			type="radio"
+			label="COM_DOWNLOADTRACKER_FIELD_UPDATE_ENABLED_LABEL"
+			description="COM_DOWNLOADTRACKER_FIELD_UPDATE_ENABLED_DESC"
+			layout="joomla.form.field.radio.switcher"
+			default="0"
+			filter="integer"
+		>
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+		<field name="update_element" type="text" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_ELEMENT_LABEL" description="COM_DOWNLOADTRACKER_FIELD_UPDATE_ELEMENT_DESC" maxlength="255" showon="update_enabled:1" />
+		<field name="update_type" type="list" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_TYPE_LABEL" default="package" showon="update_enabled:1" validate="options">
+			<option value="package">COM_DOWNLOADTRACKER_OPTION_UPDATE_TYPE_PACKAGE</option>
+			<option value="component">COM_DOWNLOADTRACKER_OPTION_UPDATE_TYPE_COMPONENT</option>
+			<option value="plugin">COM_DOWNLOADTRACKER_OPTION_UPDATE_TYPE_PLUGIN</option>
+		</field>
+		<field name="update_folder" type="text" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_FOLDER_LABEL" description="COM_DOWNLOADTRACKER_FIELD_UPDATE_FOLDER_DESC" maxlength="100" showon="update_enabled:1[AND]update_type:plugin" />
+		<field name="update_client" type="list" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_CLIENT_LABEL" default="site" showon="update_enabled:1" validate="options">
+			<option value="site">JSITE</option>
+			<option value="administrator">JADMINISTRATOR</option>
+		</field>
+		<field name="update_sha256" type="text" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_SHA256_LABEL" description="COM_DOWNLOADTRACKER_FIELD_UPDATE_SHA256_DESC" maxlength="64" showon="update_enabled:1" filter="cmd" />
+		<field name="update_targetplatform" type="text" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_TARGETPLATFORM_LABEL" description="COM_DOWNLOADTRACKER_FIELD_UPDATE_TARGETPLATFORM_DESC" default="[56]\\..*" maxlength="100" showon="update_enabled:1" filter="raw" />
+		<field name="update_php_minimum" type="text" label="COM_DOWNLOADTRACKER_FIELD_UPDATE_PHP_MINIMUM_LABEL" default="8.1" maxlength="20" showon="update_enabled:1" />
+	</fieldset>
 </form>

@@ -30,6 +30,7 @@ class LogsModel extends ListModel
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
 				'requested_url', 'a.requested_url', 'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
+				'token_id', 'a.token_id', 'token_prefix', 'a.token_prefix', 'token_status', 'a.token_status',
 				'country_code', 'a.country_code', 'ip_classification', 'a.ip_classification',
 			];
 		}
@@ -56,7 +57,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.is_bot', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status', 'a.ip_classification']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.token_id', 'a.token_prefix', 'a.token_status', 'a.is_bot', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status', 'a.ip_classification']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
@@ -74,6 +75,7 @@ class LogsModel extends ListModel
 				. ' OR ' . $db->quoteName('a.referrer') . ' LIKE :search_referrer'
 				. ' OR ' . $db->quoteName('a.requested_url') . ' LIKE :search_requested_url'
 				. ' OR ' . $db->quoteName('a.user_agent') . ' LIKE :search_user_agent'
+				. ' OR ' . $db->quoteName('a.token_prefix') . ' LIKE :search_token_prefix'
 				. ')'
 			)
 				->bind(':search_alias', $search)
@@ -81,6 +83,7 @@ class LogsModel extends ListModel
 				->bind(':search_referrer', $search)
 				->bind(':search_requested_url', $search)
 				->bind(':search_user_agent', $search);
+			$query->bind(':search_token_prefix', $search);
 		}
 
 		foreach (['product_id', 'item_id'] as $field) {

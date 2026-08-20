@@ -19,6 +19,8 @@ HTMLHelper::_('behavior.keepalive');
 	<div class="row">
 		<div class="col-lg-9">
 			<?php echo $this->form->renderFieldset('details'); ?>
+			<hr>
+			<?php echo $this->form->renderFieldset('updates'); ?>
 		</div>
 	</div>
 	<input type="hidden" name="task" value="">

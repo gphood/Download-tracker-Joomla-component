@@ -66,6 +66,8 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IS_BOT', 'a.is_bot', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REFERRER'); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REQUESTED_URL'); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_PREFIX', 'a.token_prefix', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_STATUS', 'a.token_status', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_STATUS', 'a.status', $listDirn, $listOrder); ?></th>
 				</tr>
 			</thead>
@@ -136,6 +138,8 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 						<td><?php echo ((int) $item->is_bot === 1) ? Text::_('JYES') : Text::_('JNO'); ?></td>
 						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($displayReferrer); ?></td>
 						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($requestedUrl); ?></td>
+						<td><code><?php echo $this->escape((string) $item->token_prefix); ?></code></td>
+						<td><?php echo $this->escape((string) $item->token_status); ?></td>
 						<td><?php echo $this->escape((string) $item->status); ?></td>
 					</tr>
 				<?php endforeach; ?>

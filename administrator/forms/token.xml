@@ -6,6 +6,10 @@
 			<option value="">COM_DOWNLOADTRACKER_SELECT_ITEM</option>
 		</field>
 		<field name="label" type="text" label="COM_DOWNLOADTRACKER_FIELD_TOKEN_LABEL_LABEL" maxlength="255" />
+		<field name="purpose" type="list" label="COM_DOWNLOADTRACKER_FIELD_TOKEN_PURPOSE_LABEL" description="COM_DOWNLOADTRACKER_FIELD_TOKEN_PURPOSE_DESC" default="download" validate="options">
+			<option value="download">COM_DOWNLOADTRACKER_OPTION_TOKEN_PURPOSE_DOWNLOAD</option>
+			<option value="update">COM_DOWNLOADTRACKER_OPTION_TOKEN_PURPOSE_UPDATE</option>
+		</field>
 		<field name="customer_email" type="email" label="COM_DOWNLOADTRACKER_FIELD_CUSTOMER_EMAIL_LABEL" maxlength="320" />
 		<field name="note" type="textarea" label="COM_DOWNLOADTRACKER_FIELD_NOTE_LABEL" rows="6" filter="safehtml" />
 		<field name="state" type="list" label="JSTATUS" default="1" validate="options">
@@ -13,8 +17,8 @@
 			<option value="0">JUNPUBLISHED</option>
 			<option value="-2">JTRASHED</option>
 		</field>
-		<field name="expires_at" type="calendar" label="COM_DOWNLOADTRACKER_FIELD_EXPIRES_AT_LABEL" format="%Y-%m-%d %H:%M:%S" showtime="true" filter="user_utc" />
-		<field name="max_uses" type="number" label="COM_DOWNLOADTRACKER_FIELD_MAX_USES_LABEL" min="1" step="1" filter="integer" />
+		<field name="expires_at" type="calendar" label="COM_DOWNLOADTRACKER_FIELD_EXPIRES_AT_LABEL" format="%Y-%m-%d %H:%M:%S" showtime="true" filter="user_utc" showon="purpose:download" />
+		<field name="max_uses" type="number" label="COM_DOWNLOADTRACKER_FIELD_MAX_USES_LABEL" min="1" step="1" filter="integer" showon="purpose:download" />
 		<field
 			name="send_email"
 			type="radio"

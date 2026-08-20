@@ -66,6 +66,7 @@ $hasActiveFilters = !empty($this->activeFilters);
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_ITEM', 'i.title', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_CUSTOMER_EMAIL', 'a.customer_email', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_PREFIX', 'a.token_prefix', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_PURPOSE', 'a.purpose', $listDirn, $listOrder); ?></th>
 					<th scope="col" class="w-10 text-center"><?php echo HTMLHelper::_('searchtools.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EXPIRES_AT', 'a.expires_at', $listDirn, $listOrder); ?></th>
 					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_TOKEN_USES'); ?></th>
@@ -90,6 +91,7 @@ $hasActiveFilters = !empty($this->activeFilters);
 						</td>
 						<td><?php echo $this->escape((string) $item->customer_email); ?></td>
 						<td><code><?php echo $this->escape((string) $item->token_prefix); ?></code></td>
+						<td><?php echo Text::_((string) $item->purpose === 'update' ? 'COM_DOWNLOADTRACKER_OPTION_TOKEN_PURPOSE_UPDATE' : 'COM_DOWNLOADTRACKER_OPTION_TOKEN_PURPOSE_DOWNLOAD'); ?></td>
 						<td class="text-center"><?php echo HTMLHelper::_('jgrid.published', $item->state, $i, 'tokens.', true, 'cb'); ?></td>
 						<td><?php echo $item->expires_at ? HTMLHelper::_('date', $item->expires_at, Text::_('COM_DOWNLOADTRACKER_DATE_FORMAT_LOG'), true) : Text::_('COM_DOWNLOADTRACKER_NEVER'); ?></td>
 						<td>

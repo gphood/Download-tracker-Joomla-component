@@ -40,6 +40,13 @@ class TokenTable extends Table
 			return false;
 		}
 
+		$this->purpose = (string) ($this->purpose ?: 'download') === 'update' ? 'update' : 'download';
+
+		if ($this->purpose === 'update') {
+			$this->expires_at = null;
+			$this->max_uses = null;
+		}
+
 		if ($this->max_uses !== null && $this->max_uses !== '' && (int) $this->max_uses < 1) {
 			$this->setError(Text::_('COM_DOWNLOADTRACKER_ERROR_MAX_USES_INVALID'));
 

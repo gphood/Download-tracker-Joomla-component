@@ -13,6 +13,7 @@ namespace GrantHood\Component\DownloadTracker\Site\Controller;
 
 \defined('_JEXEC') or die;
 
+use GrantHood\Component\DownloadTracker\Administrator\Helper\DownloadTrackerHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -36,27 +37,102 @@ class DownloadController extends BaseController
 			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_FOUND'));
 		}
 
+		$sourceType = (string) ($item->source_type ?: 'external');
+		$filePath = null;
+
+		if ($sourceType === 'private_file') {
+			$filePath = $this->resolvePrivateFilePath((string) $item->private_file);
+		}
+
+		$tokenResult = null;
+
 		if ((int) ($item->requires_token ?? 0) === 1) {
 			$token = $this->input->getString('token', '');
+			$tokenResult = $model->validateToken($item, $token);
 
-			if (!$model->validateToken($item, $token)) {
+			if (empty($tokenResult['valid'])) {
+				$model->logDownload(
+					$item,
+					$alias,
+					'denied',
+					$sourceType === 'private_file' ? (string) $item->private_file : (string) $item->target_url,
+					$tokenResult
+				);
 				throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_DOWNLOAD_NOT_AVAILABLE'));
 			}
 		}
 
-		$sourceType = (string) ($item->source_type ?: 'external');
-
 		if ($sourceType !== 'private_file') {
-			$model->logDownload($item, $alias);
+			$model->logDownload($item, $alias, 'redirected', null, $tokenResult);
 			$this->app->redirect((string) $item->target_url, 302);
 
 			return;
 		}
 
-		$filePath = $this->resolvePrivateFilePath((string) $item->private_file);
+		$model->logDownload($item, $alias, 'downloaded', (string) $item->private_file, $tokenResult);
+		$this->streamPrivateFile((string) $filePath);
+	}
 
-		$model->logDownload($item, $alias, 'downloaded', (string) $item->private_file);
-		$this->streamPrivateFile($filePath);
+	public function update(): void
+	{
+		$alias = trim($this->input->getString('alias', ''));
+
+		if ($alias === '') {
+			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_NOT_AVAILABLE'));
+		}
+
+		/** @var \GrantHood\Component\DownloadTracker\Site\Model\DownloadModel $model */
+		$model = $this->getModel('Download', 'Site');
+		$item = $model->getUpdateByAlias($alias);
+
+		if (!$item) {
+			throw new RouteNotFoundException(Text::_('COM_DOWNLOADTRACKER_ERROR_UPDATE_NOT_AVAILABLE'));
+		}
+
+		$document = new \DOMDocument('1.0', 'utf-8');
+		$document->formatOutput = true;
+		$updates = $document->appendChild($document->createElement('updates'));
+		$update = $updates->appendChild($document->createElement('update'));
+		$this->appendXmlElement($document, $update, 'name', (string) $item->title);
+		$this->appendXmlElement($document, $update, 'description', (string) $item->product_title . ' update package.');
+		$this->appendXmlElement($document, $update, 'element', (string) $item->update_element);
+		$this->appendXmlElement($document, $update, 'type', (string) $item->update_type);
+
+		if (trim((string) $item->update_folder) !== '') {
+			$this->appendXmlElement($document, $update, 'folder', (string) $item->update_folder);
+		}
+
+		$this->appendXmlElement($document, $update, 'client', (string) ($item->update_client ?: 'site'));
+
+		$this->appendXmlElement($document, $update, 'version', (string) $item->version);
+		$downloads = $update->appendChild($document->createElement('downloads'));
+		$downloadUrl = $downloads->appendChild($document->createElement('downloadurl'));
+		$downloadUrl->setAttribute('type', 'full');
+		$downloadUrl->setAttribute('format', 'zip');
+		$downloadUrl->appendChild($document->createTextNode(DownloadTrackerHelper::buildPublicDownloadUrlForAlias($alias)));
+		$this->appendXmlElement($document, $update, 'sha256', (string) $item->update_sha256);
+		$targetPlatform = $update->appendChild($document->createElement('targetplatform'));
+		$targetPlatform->setAttribute('name', 'joomla');
+		$targetPlatform->setAttribute('version', (string) ($item->update_targetplatform ?: '[56]\\..*'));
+		$this->appendXmlElement($document, $update, 'php_minimum', (string) ($item->update_php_minimum ?: '8.1'));
+		$tags = $update->appendChild($document->createElement('tags'));
+		$this->appendXmlElement($document, $tags, 'tag', 'stable');
+		$this->appendXmlElement($document, $update, 'maintainer', 'Grant Hood');
+		$this->appendXmlElement($document, $update, 'maintainerurl', 'https://granthood.co.uk');
+
+		$this->app->setHeader('Content-Type', 'application/xml; charset=utf-8', true);
+		$this->app->setHeader('Cache-Control', 'public, max-age=300', true);
+		$this->app->sendHeaders();
+
+		echo $document->saveXML();
+		$this->app->close();
+	}
+
+	private function appendXmlElement(\DOMDocument $document, \DOMNode $parent, string $name, string $value): void
+	{
+		$element = $document->createElement($name);
+		$element->appendChild($document->createTextNode($value));
+		$parent->appendChild($element);
 	}
 
 	private function resolvePrivateFilePath(string $privateFile): string

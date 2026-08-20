@@ -54,6 +54,18 @@ class ItemModel extends AdminModel
 		$data['alias'] = $this->prepareAlias($alias !== '' ? $alias : (string) ($data['title'] ?? ''), (int) ($data['id'] ?? 0));
 		$data['is_latest'] = empty($data['is_latest']) ? 0 : 1;
 		$data['requires_token'] = empty($data['requires_token']) ? 0 : 1;
+		$data['update_enabled'] = empty($data['update_enabled']) ? 0 : 1;
+		$data['update_element'] = trim((string) ($data['update_element'] ?? ''));
+		$data['update_type'] = in_array((string) ($data['update_type'] ?? 'package'), ['package', 'component', 'plugin'], true)
+			? (string) $data['update_type']
+			: 'package';
+		$data['update_folder'] = trim((string) ($data['update_folder'] ?? ''));
+		$data['update_client'] = in_array((string) ($data['update_client'] ?? 'site'), ['site', 'administrator'], true)
+			? (string) $data['update_client']
+			: 'site';
+		$data['update_sha256'] = strtolower(trim((string) ($data['update_sha256'] ?? '')));
+		$data['update_targetplatform'] = trim((string) ($data['update_targetplatform'] ?? ''));
+		$data['update_php_minimum'] = trim((string) ($data['update_php_minimum'] ?? ''));
 		$data['source_type'] = in_array((string) ($data['source_type'] ?? 'external'), ['external', 'private_file'], true)
 			? (string) $data['source_type']
 			: 'external';

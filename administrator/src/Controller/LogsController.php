@@ -92,6 +92,9 @@ class LogsController extends BaseController
 			'requested_url',
 			'user_agent',
 			'target_url',
+			'token_id',
+			'token_prefix',
+			'token_status',
 			'status',
 		]);
 
@@ -121,6 +124,9 @@ class LogsController extends BaseController
 				(string) $row->requested_url,
 				(string) $row->user_agent,
 				(string) $row->target_url,
+				(string) $row->token_id,
+				(string) $row->token_prefix,
+				(string) $row->token_status,
 				(string) $row->status,
 			]);
 		}

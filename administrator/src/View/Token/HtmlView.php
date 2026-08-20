@@ -44,6 +44,11 @@ class HtmlView extends BaseHtmlView
 		ToolbarHelper::apply('token.apply');
 		ToolbarHelper::save('token.save');
 		ToolbarHelper::save2new('token.save2new');
+
+		if (!$isNew && (string) ($this->item->purpose ?? 'download') === 'update') {
+			ToolbarHelper::custom('token.reissue', 'refresh', '', 'COM_DOWNLOADTRACKER_TOKEN_REISSUE', false);
+		}
+
 		ToolbarHelper::cancel('token.cancel', $isNew ? 'JTOOLBAR_CANCEL' : 'JTOOLBAR_CLOSE');
 	}
 

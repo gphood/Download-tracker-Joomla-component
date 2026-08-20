@@ -38,6 +38,47 @@ class DownloadFulfilmentService
 		return $this->createProtectedToken($request, true);
 	}
 
+	public function reissueUpdateKeyForAdmin(int $tokenId, int $createdBy): array
+	{
+		$existing = $this->getTokenForReissue($tokenId);
+
+		if (!$existing || (string) $existing->purpose !== 'update') {
+			return $this->failure(Text::_('COM_DOWNLOADTRACKER_ERROR_TOKEN_REISSUE_FAILED'));
+		}
+
+		$email = trim((string) $existing->customer_email);
+
+		if (!$this->isValidEmail($email)) {
+			return $this->failure(Text::_('COM_DOWNLOADTRACKER_ERROR_TOKEN_REISSUE_REQUIRES_EMAIL'));
+		}
+
+		$result = $this->createProtectedToken([
+			'item_id' => (int) $existing->item_id,
+			'customer_email' => $email,
+			'label' => (string) $existing->label,
+			'note' => trim((string) $existing->note . "\nReplacement for token " . (string) $existing->token_prefix),
+			'purpose' => 'update',
+			'send_email' => true,
+			'created_by' => $createdBy,
+			'source' => 'reissue',
+			'source_reference' => $tokenId . ':' . bin2hex(random_bytes(8)),
+		], true);
+
+		if (empty($result['success']) || ($result['email_status'] ?? '') !== 'sent') {
+			if (!empty($result['token_id'])) {
+				$this->setTokenState((int) $result['token_id'], 0, $createdBy);
+			}
+
+			return $result;
+		}
+
+		$this->setTokenState($tokenId, 0, $createdBy);
+		$result['replaced_token_id'] = $tokenId;
+		$result['customer_email'] = $email;
+
+		return $result;
+	}
+
 	private function createProtectedToken(array $request, bool $includeRawToken): array
 	{
 		$itemId = (int) ($request['item_id'] ?? 0);
@@ -45,6 +86,14 @@ class DownloadFulfilmentService
 		$email = trim((string) ($request['customer_email'] ?? ''));
 		$source = trim((string) ($request['source'] ?? ''));
 		$sourceReference = trim((string) ($request['source_reference'] ?? ''));
+		$purpose = (string) ($request['purpose'] ?? 'download') === 'update' ? 'update' : 'download';
+
+		if ($purpose === 'update') {
+			$request['max_uses'] = null;
+			$request['expires_at'] = null;
+		}
+
+		$request['purpose'] = $purpose;
 
 		if ($source !== '' && $sourceReference !== '') {
 			$existing = $this->getExistingTokenForSource($source, $sourceReference);
@@ -92,6 +141,7 @@ class DownloadFulfilmentService
 			'email_status' => null,
 			'error' => null,
 			'item_title' => (string) $item->title,
+			'purpose' => $purpose,
 		];
 
 		if ($includeRawToken) {
@@ -100,7 +150,7 @@ class DownloadFulfilmentService
 		}
 
 		if ($sendEmail) {
-			$emailResult = $this->sendTokenEmail($tokenId, $email, (string) $item->title, $downloadUrl, $request);
+			$emailResult = $this->sendTokenEmail($tokenId, $email, (string) $item->title, $downloadUrl, $rawToken, $request);
 			$result['download_url_sent'] = $emailResult['sent'];
 			$result['email_status'] = $emailResult['status'];
 			$result['error'] = $emailResult['error'];
@@ -120,6 +170,7 @@ class DownloadFulfilmentService
 			'label' => trim((string) ($request['label'] ?? '')),
 			'token_hash' => hash('sha256', $rawToken),
 			'token_prefix' => $tokenPrefix,
+			'purpose' => (string) ($request['purpose'] ?? 'download'),
 			'state' => (int) ($request['state'] ?? 1),
 			'expires_at' => $expiresAt !== '' ? $expiresAt : null,
 			'max_uses' => $maxUses !== null && $maxUses !== '' ? max(1, (int) $maxUses) : null,
@@ -138,7 +189,7 @@ class DownloadFulfilmentService
 		return (int) $token->id;
 	}
 
-	private function sendTokenEmail(int $tokenId, string $email, string $itemTitle, string $downloadUrl, array $request): array
+	private function sendTokenEmail(int $tokenId, string $email, string $itemTitle, string $downloadUrl, string $rawToken, array $request): array
 	{
 		$app = Factory::getApplication();
 		$this->loadEmailLanguageStrings();
@@ -167,8 +218,9 @@ class DownloadFulfilmentService
 			$expiry = !empty($request['expires_at']) ? (string) $request['expires_at'] : $this->translateOrFallback('COM_DOWNLOADTRACKER_EMAIL_NO_EXPIRY', 'No expiry date');
 			$maxUses = !empty($request['max_uses']) ? (string) (int) $request['max_uses'] : $this->translateOrFallback('COM_DOWNLOADTRACKER_UNLIMITED', 'Unlimited');
 			$supportName = $fromName !== '' ? $fromName : (string) $app->get('sitename', '');
-			$subject = $this->buildEmailSubject($itemTitle);
-			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $expiry, $maxUses, $supportName);
+			$purpose = (string) ($request['purpose'] ?? 'download');
+			$subject = $this->buildEmailSubject($itemTitle, $purpose);
+			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $rawToken, $expiry, $maxUses, $supportName, $purpose);
 
 			$mailer->addRecipient($email);
 			$mailer->setSubject($subject);
@@ -198,8 +250,16 @@ class DownloadFulfilmentService
 		$language->load('com_downloadtracker', JPATH_SITE, null, true, true);
 	}
 
-	private function buildEmailSubject(string $itemTitle): string
+	private function buildEmailSubject(string $itemTitle, string $purpose): string
 	{
+		if ($purpose === 'update') {
+			$subject = Text::sprintf('COM_DOWNLOADTRACKER_EMAIL_UPDATE_SUBJECT', $itemTitle);
+
+			return $this->isUntranslatedEmailString($subject, 'COM_DOWNLOADTRACKER_EMAIL_UPDATE_SUBJECT')
+				? sprintf('Your download and update key for %s', $itemTitle)
+				: $subject;
+		}
+
 		$subject = Text::sprintf('COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_SUBJECT', $itemTitle);
 
 		if ($this->isUntranslatedEmailString($subject, 'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_SUBJECT')) {
@@ -209,8 +269,30 @@ class DownloadFulfilmentService
 		return $subject;
 	}
 
-	private function buildEmailBody(string $itemTitle, string $downloadUrl, string $expiry, string $maxUses, string $supportName): string
+	private function buildEmailBody(string $itemTitle, string $downloadUrl, string $rawToken, string $expiry, string $maxUses, string $supportName, string $purpose): string
 	{
+		if ($purpose === 'update') {
+			$body = Text::sprintf(
+				'COM_DOWNLOADTRACKER_EMAIL_UPDATE_BODY',
+				$itemTitle,
+				$downloadUrl,
+				$rawToken,
+				$supportName
+			);
+
+			if (!$this->isUntranslatedEmailString($body, 'COM_DOWNLOADTRACKER_EMAIL_UPDATE_BODY')) {
+				return $body;
+			}
+
+			return sprintf(
+				"Thank you for your purchase.\n\nYour secure download link for %s is:\n\n%s\n\nYour Joomla update key is:\n\n%s\n\nKeep this key private. Enter it once in System -> Update -> Update Sites on each Joomla site where you install the extension.\n\n%s",
+				$itemTitle,
+				$downloadUrl,
+				$rawToken,
+				$supportName
+			);
+		}
+
 		$body = Text::sprintf(
 			'COM_DOWNLOADTRACKER_EMAIL_DOWNLOAD_BODY',
 			$itemTitle,
@@ -314,6 +396,32 @@ class DownloadFulfilmentService
 		$token = $this->db->loadObject();
 
 		return $token ?: null;
+	}
+
+	private function getTokenForReissue(int $tokenId): ?object
+	{
+		$query = $this->db->getQuery(true)
+			->select($this->db->quoteName(['id', 'item_id', 'label', 'customer_email', 'note', 'purpose', 'token_prefix']))
+			->from($this->db->quoteName('#__downloadtracker_tokens'))
+			->where($this->db->quoteName('id') . ' = :id')
+			->bind(':id', $tokenId, ParameterType::INTEGER);
+
+		$this->db->setQuery($query);
+		$token = $this->db->loadObject();
+
+		return $token ?: null;
+	}
+
+	private function setTokenState(int $tokenId, int $state, int $modifiedBy): void
+	{
+		$update = (object) [
+			'id' => $tokenId,
+			'state' => $state,
+			'modified' => Factory::getDate()->toSql(),
+			'modified_by' => $modifiedBy,
+		];
+
+		$this->db->updateObject('#__downloadtracker_tokens', $update, 'id', true);
 	}
 
 	private function failure(string $error): array

@@ -69,6 +69,7 @@ class TokenModel extends AdminModel
 
 		$data['item_id'] = (int) ($data['item_id'] ?? 0);
 		$data['state'] = (int) ($data['state'] ?? 1);
+		$data['purpose'] = (string) ($data['purpose'] ?? 'download') === 'update' ? 'update' : 'download';
 		$data['label'] = trim((string) ($data['label'] ?? ''));
 		$data['customer_email'] = trim((string) ($data['customer_email'] ?? ''));
 		$data['note'] = (string) ($data['note'] ?? '');
@@ -82,13 +83,16 @@ class TokenModel extends AdminModel
 			return false;
 		}
 
-		if ($data['expires_at'] === '') {
+		if ($data['purpose'] === 'update') {
+			$data['expires_at'] = null;
+			$data['max_uses'] = null;
+		} elseif ($data['expires_at'] === '') {
 			$data['expires_at'] = null;
 		}
 
-		if ($data['max_uses'] === '') {
+		if ($data['purpose'] !== 'update' && $data['max_uses'] === '') {
 			$data['max_uses'] = null;
-		} else {
+		} elseif ($data['purpose'] !== 'update') {
 			$data['max_uses'] = max(1, (int) $data['max_uses']);
 		}
 
@@ -98,6 +102,7 @@ class TokenModel extends AdminModel
 				'customer_email' => $data['customer_email'],
 				'label' => $data['label'],
 				'note' => $data['note'],
+				'purpose' => $data['purpose'],
 				'state' => $data['state'],
 				'expires_at' => $data['expires_at'],
 				'max_uses' => $data['max_uses'],
@@ -127,6 +132,14 @@ class TokenModel extends AdminModel
 		}
 
 		return parent::save($data);
+	}
+
+	public function reissue(int $tokenId): array
+	{
+		return (new DownloadFulfilmentService())->reissueUpdateKeyForAdmin(
+			$tokenId,
+			(int) Factory::getApplication()->getIdentity()->id
+		);
 	}
 
 	protected function prepareTable($table): void
