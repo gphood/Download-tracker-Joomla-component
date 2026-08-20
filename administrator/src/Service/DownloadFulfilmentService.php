@@ -150,7 +150,15 @@ class DownloadFulfilmentService
 		}
 
 		if ($sendEmail) {
-			$emailResult = $this->sendTokenEmail($tokenId, $email, (string) $item->title, $downloadUrl, $rawToken, $request);
+			$emailResult = $this->sendTokenEmail(
+				$tokenId,
+				$email,
+				(string) $item->title,
+				(string) ($item->customer_instructions ?? ''),
+				$downloadUrl,
+				$rawToken,
+				$request
+			);
 			$result['download_url_sent'] = $emailResult['sent'];
 			$result['email_status'] = $emailResult['status'];
 			$result['error'] = $emailResult['error'];
@@ -189,7 +197,7 @@ class DownloadFulfilmentService
 		return (int) $token->id;
 	}
 
-	private function sendTokenEmail(int $tokenId, string $email, string $itemTitle, string $downloadUrl, string $rawToken, array $request): array
+	private function sendTokenEmail(int $tokenId, string $email, string $itemTitle, string $customerInstructions, string $downloadUrl, string $rawToken, array $request): array
 	{
 		$app = Factory::getApplication();
 		$this->loadEmailLanguageStrings();
@@ -221,6 +229,15 @@ class DownloadFulfilmentService
 			$purpose = (string) ($request['purpose'] ?? 'download');
 			$subject = $this->buildEmailSubject($itemTitle, $purpose);
 			$body = $this->buildEmailBody($itemTitle, $downloadUrl, $rawToken, $expiry, $maxUses, $supportName, $purpose);
+			$customerInstructions = trim($customerInstructions);
+
+			if ($customerInstructions !== '') {
+				$instructionsHeading = $this->translateOrFallback(
+					'COM_DOWNLOADTRACKER_EMAIL_CUSTOMER_INSTRUCTIONS_HEADING',
+					'Important installation information:'
+				);
+				$body = rtrim($body) . "\n\n" . $instructionsHeading . "\n" . $customerInstructions;
+			}
 
 			$mailer->addRecipient($email);
 			$mailer->setSubject($subject);
@@ -371,7 +388,7 @@ class DownloadFulfilmentService
 	private function getDownloadItem(int $itemId): ?object
 	{
 		$query = $this->db->getQuery(true)
-			->select($this->db->quoteName(['id', 'title', 'alias']))
+			->select($this->db->quoteName(['id', 'title', 'alias', 'customer_instructions']))
 			->from($this->db->quoteName('#__downloadtracker_items'))
 			->where($this->db->quoteName('id') . ' = :id')
 			->bind(':id', $itemId, ParameterType::INTEGER);

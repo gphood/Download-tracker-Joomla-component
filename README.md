@@ -79,14 +79,15 @@ For a private Joomla extension package:
 
 1. Set the Download Item source to `Private local file` and require a download token.
 2. In the Download Item's `Joomla updates` section, enable the update feed.
-3. Enter the installed extension element, type, supported Joomla expression, PHP minimum, and the ZIP's SHA-256 checksum.
-4. Give the package manifest an update server URL in this form:
+3. Add any product-specific prerequisites to `Customer installation instructions`; these are appended to purchase and update-key emails.
+4. Enter the installed extension element, type, supported Joomla expression, PHP minimum, and the ZIP's SHA-256 checksum.
+5. Give the package manifest an update server URL in this form:
 
 ```text
 /index.php?option=com_downloadtracker&task=download.update&alias=your-download-alias&format=raw
 ```
 
-5. Add `<dlid prefix="token=" suffix="" />` to the package manifest.
+6. Add `<dlid prefix="token=" suffix="" />` to the package manifest.
 
 Keys created with the persistent update purpose, whether by Stripe or manually, have no expiry or usage limit. The purchaser receives the key by email and enters it once in the installed update site's `Download Key` field. The public XML contains release metadata only; downloading the ZIP still requires a valid key.
 

@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_items` (
 	`target_url` text NOT NULL,
 	`private_file` varchar(1024) NULL,
 	`requires_token` tinyint NOT NULL DEFAULT 0,
+	`customer_instructions` text NULL,
 	`update_enabled` tinyint NOT NULL DEFAULT 0,
 	`update_element` varchar(255) NULL,
 	`update_type` varchar(20) NULL,
