@@ -10,13 +10,15 @@ Reusable Joomla 5/6 component for tracking and securely delivering extension and
 - Publish Joomla-compatible update XML from the current Download Item version and package checksum.
 - Replace a customer update key while revoking the old key.
 - Log authorised and denied requests without storing the full secret key.
-- Administrator log view and CSV export.
+- Mark deliberate Codex checks in the logs while excluding them from download statistics.
+- Correlate Microsoft-hosted email security checks with nearby customer requests and exclude suspected scans from human-download totals.
+- Compact administrator log view with working Product, Item, Edition, and Version filters, plus CSV export.
 - SEF-friendly `/download/{alias}` frontend route when a matching Joomla menu item exists.
 - Joomla MVC structure with administrator and site applications.
 
 ## Install
 
-Install the public component release package `com_downloadtracker-0.1.30.zip` through Joomla Administrator:
+Install the public component release package `com_downloadtracker-0.1.39.zip` through Joomla Administrator:
 
 ```text
 System -> Install -> Extensions
@@ -90,6 +92,20 @@ For a private Joomla extension package:
 6. Add `<dlid prefix="token=" suffix="" />` to the package manifest.
 
 Keys created with the persistent update purpose, whether by Stripe or manually, have no expiry or usage limit. The purchaser receives the key by email and enters it once in the installed update site's `Download Key` field. The public XML contains release metadata only; downloading the ZIP still requires a valid key.
+
+## Automated email security checks
+
+Download Tracker retains all authorised requests for audit purposes, including automated checks made by email security systems. After IPinfo Lite enrichment, a Microsoft-hosted request is marked as a suspected email security scan only when all of these signals are present:
+
+- the request used a valid token successfully;
+- the same token and download item were requested from a different, non-Microsoft public network within five minutes; and
+- the Microsoft request has not already been classified manually or by its user agent.
+
+Suspected scans continue to receive the requested file and remain visible in the log, but are marked as bots and excluded from human-download dashboard totals. This conservative correlation intentionally favours false negatives over hiding a genuine customer request.
+
+## Deliberate test downloads
+
+Requests made with the HTTP header `X-DownloadTracker-Test: codex` remain visible in the download logs with a `Codex test` badge. Successful marked tests, denied requests, and detected bots do not contribute to the human-download statistics. The all-downloads total includes detected bots but excludes marked tests and denied requests.
 
 ## Database Tables
 

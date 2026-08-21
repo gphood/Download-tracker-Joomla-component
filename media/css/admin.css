@@ -53,7 +53,9 @@
 .com-downloadtracker-logs-table {
 	font-size: .78rem;
 	line-height: 1.25;
-	min-width: 82rem;
+	min-width: 54rem;
+	table-layout: fixed;
+	width: 100%;
 }
 
 .com-downloadtracker-logs-table th,
@@ -62,9 +64,67 @@
 	vertical-align: top;
 }
 
-.com-downloadtracker-url-cell {
-	max-width: 18rem;
-	overflow-wrap: anywhere;
+.com-downloadtracker-log-col--select {
+	width: 2.5rem;
+}
+
+.com-downloadtracker-log-col--date {
+	width: 6.5rem;
+}
+
+.com-downloadtracker-log-col--download {
+	width: 11rem;
+}
+
+.com-downloadtracker-log-col--release {
+	width: 6.5rem;
+}
+
+.com-downloadtracker-log-col--visitor {
+	width: 11.5rem;
+}
+
+.com-downloadtracker-log-col--result {
+	width: 10.5rem;
+}
+
+.com-downloadtracker-log-label {
+	font-size: .7rem;
+	font-weight: 600;
+}
+
+.com-downloadtracker-log-meta {
+	color: var(--secondary-color, #6c757d);
+	margin-top: .18rem;
+}
+
+.com-downloadtracker-log-code {
+	font-size: .72rem;
+	margin-top: .2rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.com-downloadtracker-log-reason {
+	line-height: 1.2;
+	margin-top: .2rem;
+}
+
+.com-downloadtracker-log-request-line {
+	min-width: 0;
+}
+
+.com-downloadtracker-log-request-line .com-downloadtracker-log-label {
+	display: block;
+}
+
+.com-downloadtracker-log-value--truncate {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .com-downloadtracker-referrer-cell {

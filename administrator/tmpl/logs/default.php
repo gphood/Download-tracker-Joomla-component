@@ -13,6 +13,8 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use GrantHood\Component\DownloadTracker\Administrator\Helper\DownloadTrackerHelper;
+use GrantHood\Component\DownloadTracker\Administrator\Service\DownloadLogStatus;
 
 HTMLHelper::_('behavior.multiselect');
 HTMLHelper::_('bootstrap.tooltip', '.hasTooltip');
@@ -52,28 +54,50 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 		<div class="table-responsive">
 		<table class="table itemList com-downloadtracker-logs-table">
 			<caption class="visually-hidden"><?php echo Text::_('COM_DOWNLOADTRACKER_LOGS_TABLE_CAPTION'); ?></caption>
+			<colgroup>
+				<col class="com-downloadtracker-log-col--select">
+				<col class="com-downloadtracker-log-col--date">
+				<col class="com-downloadtracker-log-col--download">
+				<col class="com-downloadtracker-log-col--release">
+				<col class="com-downloadtracker-log-col--visitor">
+				<col class="com-downloadtracker-log-col--request">
+				<col class="com-downloadtracker-log-col--result">
+			</colgroup>
 			<thead>
 				<tr>
 					<td class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></td>
-					<th scope="col" class="com-downloadtracker-nowrap"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_DOWNLOADED_AT', 'a.downloaded_at', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_REQUESTED_ALIAS', 'a.requested_alias', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_ITEM', 'i.title', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_PRODUCT', 'p.title', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_EDITION', 'a.edition', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_VERSION', 'a.version', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_RESOLVED_VERSION', 'a.resolved_version', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IP_ADDRESS', 'a.ip_address', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_IS_BOT', 'a.is_bot', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REFERRER'); ?></th>
-					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REQUESTED_URL'); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_PREFIX', 'a.token_prefix', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_TOKEN_STATUS', 'a.token_status', $listDirn, $listOrder); ?></th>
-					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_STATUS', 'a.status', $listDirn, $listOrder); ?></th>
+					<th scope="col" class="com-downloadtracker-nowrap"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_DATE', 'a.downloaded_at', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_DOWNLOAD', 'i.title', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_RELEASE', 'a.version', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_VISITOR', 'a.ip_address', $listDirn, $listOrder); ?></th>
+					<th scope="col"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REQUEST'); ?></th>
+					<th scope="col"><?php echo HTMLHelper::_('searchtools.sort', 'COM_DOWNLOADTRACKER_HEADING_ACCESS_RESULT', 'a.status', $listDirn, $listOrder); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach ($this->items as $i => $item) : ?>
 					<?php
+					$botReason = trim((string) $item->bot_reason);
+					$botReasonLabels = [
+						'user_agent_match' => Text::_('COM_DOWNLOADTRACKER_BOT_REASON_USER_AGENT_MATCH'),
+						'microsoft_email_security_scan' => Text::_('COM_DOWNLOADTRACKER_BOT_REASON_MICROSOFT_EMAIL_SECURITY_SCAN'),
+					];
+					$botReasonLabel = $botReasonLabels[$botReason] ?? $botReason;
+					$isTestDownload = DownloadLogStatus::isTest((string) $item->status);
+					$statusLabel = DownloadTrackerHelper::getLogStatusLabel((string) $item->status);
+					$itemTitle = trim((string) $item->item_title);
+					$productTitle = trim((string) $item->product_title);
+					$downloadMetaParts = [];
+
+					if ($productTitle !== '' && strcasecmp($productTitle, $itemTitle) !== 0) {
+						$downloadMetaParts[] = $productTitle;
+					}
+
+					if (trim((string) $item->edition) !== '') {
+						$downloadMetaParts[] = trim((string) $item->edition);
+					}
+
+					$downloadMeta = implode(' · ', $downloadMetaParts);
 					$referrer = trim((string) $item->referrer);
 					$requestedUrl = trim((string) $item->requested_url);
 					$requestedAlias = trim((string) $item->requested_alias);
@@ -118,29 +142,59 @@ $isDownloadRequestReferrer = static function (string $referrer, string $requeste
 					?>
 					<tr class="row<?php echo $i % 2; ?>">
 						<td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, $item->id); ?></td>
-						<td class="com-downloadtracker-nowrap"><?php echo HTMLHelper::_('date', $item->downloaded_at, Text::_('COM_DOWNLOADTRACKER_DATE_FORMAT_LOG'), true); ?></td>
-						<td><?php echo $this->escape((string) $item->requested_alias); ?></td>
-						<td><?php echo $this->escape((string) $item->item_title); ?></td>
-						<td><?php echo $this->escape((string) $item->product_title); ?></td>
-						<td><?php echo $this->escape((string) $item->edition); ?></td>
-						<td><?php echo $this->escape((string) $item->version); ?></td>
-						<td><?php echo $this->escape((string) $item->resolved_version); ?></td>
 						<td class="com-downloadtracker-nowrap">
-							<span>
+							<span class="d-block"><?php echo HTMLHelper::_('date', $item->downloaded_at, 'd M Y', true); ?></span>
+							<span class="com-downloadtracker-log-meta d-block"><?php echo HTMLHelper::_('date', $item->downloaded_at, 'H:i', true); ?></span>
+						</td>
+						<td>
+							<strong class="d-block"><?php echo $this->escape($itemTitle); ?></strong>
+							<?php if ($downloadMeta !== '') : ?>
+								<span class="com-downloadtracker-log-meta d-block"><?php echo $this->escape($downloadMeta); ?></span>
+							<?php endif; ?>
+							<code class="com-downloadtracker-log-code d-block"><?php echo $this->escape((string) $item->requested_alias); ?></code>
+						</td>
+						<td>
+							<div><span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_VERSION'); ?>:</span> <?php echo $this->escape((string) $item->version); ?></div>
+							<div class="com-downloadtracker-log-meta"><span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_RESOLVED_VERSION'); ?>:</span> <?php echo $this->escape((string) $item->resolved_version); ?></div>
+						</td>
+						<td>
+							<div class="com-downloadtracker-nowrap">
 								<?php echo $this->escape((string) $item->ip_address); ?>
 								<?php if (trim((string) $item->country_code) !== '') : ?>
 									<span class="badge bg-info ms-1 hasTooltip com-downloadtracker-ip-badge com-downloadtracker-ip-badge--country" title="<?php echo $this->escape($countryTooltip); ?>"><?php echo $this->escape((string) $item->country_code); ?></span>
 								<?php elseif (isset($classificationLabels[$classification])) : ?>
 									<span class="badge bg-secondary ms-1 hasTooltip com-downloadtracker-ip-badge" title="<?php echo $this->escape($classificationTooltips[$classification] ?? Text::_('COM_DOWNLOADTRACKER_IP_CLASSIFICATION_NOT_PUBLIC_TOOLTIP')); ?>"><?php echo $this->escape($classificationLabels[$classification]); ?></span>
 								<?php endif; ?>
-							</span>
+							</div>
+							<div class="com-downloadtracker-log-meta">
+								<span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_IS_BOT'); ?>:</span>
+								<?php echo ((int) $item->is_bot === 1) ? Text::_('JYES') : Text::_('JNO'); ?>
+							</div>
+							<?php if ((int) $item->is_bot === 1 && $botReasonLabel !== '') : ?>
+								<small class="text-muted d-block com-downloadtracker-log-reason"><?php echo $this->escape($botReasonLabel); ?></small>
+							<?php endif; ?>
 						</td>
-						<td><?php echo ((int) $item->is_bot === 1) ? Text::_('JYES') : Text::_('JNO'); ?></td>
-						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($displayReferrer); ?></td>
-						<td class="com-downloadtracker-url-cell"><?php echo $this->escape($requestedUrl); ?></td>
-						<td><code><?php echo $this->escape((string) $item->token_prefix); ?></code></td>
-						<td><?php echo $this->escape((string) $item->token_status); ?></td>
-						<td><?php echo $this->escape((string) $item->status); ?></td>
+						<td>
+							<div class="com-downloadtracker-log-request-line">
+								<span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REQUESTED_URL'); ?>:</span>
+								<span class="com-downloadtracker-log-value--truncate" title="<?php echo $this->escape($requestedUrl); ?>"><?php echo $this->escape($requestedUrl); ?></span>
+							</div>
+							<div class="com-downloadtracker-log-request-line com-downloadtracker-log-meta">
+								<span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_REFERRER'); ?>:</span>
+								<span class="com-downloadtracker-log-value--truncate" title="<?php echo $this->escape($displayReferrer); ?>"><?php echo $this->escape($displayReferrer); ?></span>
+							</div>
+						</td>
+						<td>
+							<div><span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_TOKEN_PREFIX'); ?>:</span> <?php if (trim((string) $item->token_prefix) !== '') : ?><code><?php echo $this->escape((string) $item->token_prefix); ?></code><?php else : ?>&mdash;<?php endif; ?></div>
+							<div class="com-downloadtracker-log-meta"><span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_TOKEN_STATUS'); ?>:</span> <?php echo trim((string) $item->token_status) !== '' ? $this->escape((string) $item->token_status) : '&mdash;'; ?></div>
+							<div class="com-downloadtracker-log-meta">
+								<span class="com-downloadtracker-log-label"><?php echo Text::_('COM_DOWNLOADTRACKER_HEADING_STATUS'); ?>:</span>
+								<?php if ($isTestDownload) : ?>
+									<span class="badge bg-info text-dark"><?php echo Text::_('COM_DOWNLOADTRACKER_BADGE_CODEX_TEST'); ?></span>
+								<?php endif; ?>
+								<?php echo $this->escape($statusLabel); ?>
+							</div>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>

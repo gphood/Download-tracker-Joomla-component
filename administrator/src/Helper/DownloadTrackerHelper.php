@@ -19,6 +19,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Database\ParameterType;
+use GrantHood\Component\DownloadTracker\Administrator\Service\DownloadLogStatus;
 
 class DownloadTrackerHelper
 {
@@ -136,5 +137,17 @@ class DownloadTrackerHelper
 			. '</ol>'
 			. '<p class="mb-0">' . Text::_('COM_DOWNLOADTRACKER_SEF_WARNING_NON_BLOCKING') . '</p>'
 			. '</div>';
+	}
+
+	public static function getLogStatusLabel(string $status): string
+	{
+		$languageKeys = [
+			'downloaded' => 'COM_DOWNLOADTRACKER_STATUS_DOWNLOADED',
+			'redirected' => 'COM_DOWNLOADTRACKER_STATUS_REDIRECTED',
+			'denied' => 'COM_DOWNLOADTRACKER_STATUS_DENIED',
+		];
+		$baseStatus = DownloadLogStatus::getBaseStatus($status);
+
+		return isset($languageKeys[$baseStatus]) ? Text::_($languageKeys[$baseStatus]) : $baseStatus;
 	}
 }

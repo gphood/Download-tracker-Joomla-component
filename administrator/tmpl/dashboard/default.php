@@ -10,6 +10,7 @@
 \defined('_JEXEC') or die;
 
 use GrantHood\Component\DownloadTracker\Administrator\Helper\DownloadTrackerHelper;
+use GrantHood\Component\DownloadTracker\Administrator\Service\DownloadLogStatus;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
@@ -174,7 +175,12 @@ $formatReferrer = static function (string $referrer) use ($siteHost): string {
 								<td><?php echo HTMLHelper::_('date', $log->downloaded_at, Text::_('COM_DOWNLOADTRACKER_DATE_FORMAT_LOG')); ?></td>
 								<td><?php echo $this->escape((string) $log->requested_alias); ?></td>
 								<td><?php echo $this->escape((string) $log->item_title); ?></td>
-								<td><?php echo $this->escape((string) $log->status); ?></td>
+								<td>
+									<?php if (DownloadLogStatus::isTest((string) $log->status)) : ?>
+										<span class="badge bg-info text-dark"><?php echo Text::_('COM_DOWNLOADTRACKER_BADGE_CODEX_TEST'); ?></span>
+									<?php endif; ?>
+									<?php echo $this->escape(DownloadTrackerHelper::getLogStatusLabel((string) $log->status)); ?>
+								</td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>

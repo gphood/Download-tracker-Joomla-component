@@ -18,6 +18,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\ParameterType;
+use GrantHood\Component\DownloadTracker\Administrator\Service\EmailSecurityScanClassifier;
 
 class LogsModel extends ListModel
 {
@@ -29,7 +30,8 @@ class LogsModel extends ListModel
 				'product_title', 'p.title', 'edition', 'a.edition', 'version', 'a.version',
 				'requested_alias', 'a.requested_alias', 'resolved_version', 'a.resolved_version',
 				'ip_address', 'a.ip_address', 'referrer', 'a.referrer', 'user_agent', 'a.user_agent',
-				'requested_url', 'a.requested_url', 'target_url', 'a.target_url', 'is_bot', 'a.is_bot', 'status', 'a.status',
+				'requested_url', 'a.requested_url', 'target_url', 'a.target_url', 'is_bot', 'a.is_bot',
+				'bot_reason', 'a.bot_reason', 'status', 'a.status',
 				'token_id', 'a.token_id', 'token_prefix', 'a.token_prefix', 'token_status', 'a.token_status',
 				'country_code', 'a.country_code', 'ip_classification', 'a.ip_classification',
 			];
@@ -57,7 +59,7 @@ class LogsModel extends ListModel
 	{
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
-			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.token_id', 'a.token_prefix', 'a.token_status', 'a.is_bot', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status', 'a.ip_classification']))
+			->select($db->quoteName(['a.id', 'a.item_id', 'a.product_id', 'a.downloaded_at', 'a.requested_alias', 'a.edition', 'a.version', 'a.resolved_version', 'a.ip_address', 'a.referrer', 'a.requested_url', 'a.user_agent', 'a.target_url', 'a.token_id', 'a.token_prefix', 'a.token_status', 'a.is_bot', 'a.bot_reason', 'a.status', 'a.country_code', 'a.country_name', 'a.continent_code', 'a.continent_name', 'a.asn', 'a.asn_name', 'a.asn_domain', 'a.ip_location_provider', 'a.ip_location_checked_at', 'a.ip_location_status', 'a.ip_classification']))
 			->select($db->quoteName('i.title', 'item_title'))
 			->select($db->quoteName('p.title', 'product_title'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
@@ -76,32 +78,44 @@ class LogsModel extends ListModel
 				. ' OR ' . $db->quoteName('a.requested_url') . ' LIKE :search_requested_url'
 				. ' OR ' . $db->quoteName('a.user_agent') . ' LIKE :search_user_agent'
 				. ' OR ' . $db->quoteName('a.token_prefix') . ' LIKE :search_token_prefix'
+				. ' OR ' . $db->quoteName('a.bot_reason') . ' LIKE :search_bot_reason'
 				. ')'
 			)
 				->bind(':search_alias', $search)
 				->bind(':search_ip', $search)
 				->bind(':search_referrer', $search)
 				->bind(':search_requested_url', $search)
-				->bind(':search_user_agent', $search);
-			$query->bind(':search_token_prefix', $search);
+				->bind(':search_user_agent', $search)
+				->bind(':search_token_prefix', $search)
+				->bind(':search_bot_reason', $search);
 		}
 
-		foreach (['product_id', 'item_id'] as $field) {
-			$value = $this->getState('filter.' . $field);
+		$productId = (int) $this->getState('filter.product_id');
 
-			if (is_numeric($value) && (int) $value > 0) {
-				$value = (int) $value;
-				$query->where($db->quoteName('a.' . $field) . ' = :' . $field)->bind(':' . $field, $value, ParameterType::INTEGER);
-			}
+		if ($productId > 0) {
+			$query->where($db->quoteName('a.product_id') . ' = :product_id')
+				->bind(':product_id', $productId, ParameterType::INTEGER);
 		}
 
-		foreach (['edition', 'version'] as $field) {
-			$value = trim((string) $this->getState('filter.' . $field));
+		$itemId = (int) $this->getState('filter.item_id');
 
-			if ($value !== '') {
-				$value = '%' . str_replace(' ', '%', $value) . '%';
-				$query->where($db->quoteName('a.' . $field) . ' LIKE :' . $field)->bind(':' . $field, $value);
-			}
+		if ($itemId > 0) {
+			$query->where($db->quoteName('a.item_id') . ' = :item_id')
+				->bind(':item_id', $itemId, ParameterType::INTEGER);
+		}
+
+		$edition = trim((string) $this->getState('filter.edition'));
+
+		if ($edition !== '') {
+			$edition = '%' . str_replace(' ', '%', $edition) . '%';
+			$query->where($db->quoteName('a.edition') . ' LIKE :edition')->bind(':edition', $edition);
+		}
+
+		$version = trim((string) $this->getState('filter.version'));
+
+		if ($version !== '') {
+			$version = '%' . str_replace(' ', '%', $version) . '%';
+			$query->where($db->quoteName('a.version') . ' LIKE :version')->bind(':version', $version);
 		}
 
 		$status = trim((string) $this->getState('filter.status'));
@@ -158,12 +172,14 @@ class LogsModel extends ListModel
 
 		$rows = $this->getLocationBatch($batchSize);
 		$stats = $this->getEmptyLocationStats();
+		$processedIds = [];
 		$http = HttpFactory::getHttp([
 			'timeout' => 10,
 			'userAgent' => 'DownloadTracker/IPinfoLite',
 		]);
 
 		foreach ($rows as $row) {
+			$processedIds[] = (int) $row->id;
 			$ip = trim((string) $row->ip_address);
 			$checkedAt = Factory::getDate()->toSql();
 			$classification = $this->classifyIp($ip);
@@ -224,6 +240,8 @@ class LogsModel extends ListModel
 			$stats[$status]++;
 		}
 
+		$stats['classified'] = $this->classifyEmailSecurityScans($processedIds);
+
 		return $stats;
 	}
 
@@ -253,8 +271,57 @@ class LogsModel extends ListModel
 			'success' => 0,
 			'failed' => 0,
 			'skipped' => 0,
+			'classified' => 0,
 			'error' => $error,
 		];
+	}
+
+	private function classifyEmailSecurityScans(array $logIds): int
+	{
+		$logIds = array_values(array_unique(array_filter(array_map('intval', $logIds))));
+
+		if ($logIds === []) {
+			return 0;
+		}
+
+		$db = $this->getDatabase();
+		$tokenQuery = $db->getQuery(true)
+			->select('DISTINCT ' . $db->quoteName('token_id'))
+			->from($db->quoteName('#__downloadtracker_logs'))
+			->whereIn($db->quoteName('id'), $logIds, ParameterType::INTEGER)
+			->where($db->quoteName('token_id') . ' IS NOT NULL');
+
+		$db->setQuery($tokenQuery);
+		$tokenIds = array_values(array_unique(array_filter(array_map('intval', $db->loadColumn()))));
+
+		if ($tokenIds === []) {
+			return 0;
+		}
+
+		$logQuery = $db->getQuery(true)
+			->select($db->quoteName([
+				'id', 'item_id', 'downloaded_at', 'ip_address', 'is_bot', 'bot_reason', 'token_id',
+				'token_status', 'status', 'asn', 'asn_domain', 'ip_location_status',
+			]))
+			->from($db->quoteName('#__downloadtracker_logs'))
+			->whereIn($db->quoteName('token_id'), $tokenIds, ParameterType::INTEGER);
+
+		$db->setQuery($logQuery);
+		$classifications = (new EmailSecurityScanClassifier())->classify($db->loadObjectList());
+
+		foreach ($classifications as $id => $reason) {
+			$db->updateObject(
+				'#__downloadtracker_logs',
+				(object) [
+					'id' => (int) $id,
+					'is_bot' => 1,
+					'bot_reason' => $reason,
+				],
+				'id'
+			);
+		}
+
+		return count($classifications);
 	}
 
 	private function getLocationBatch(int $batchSize): array

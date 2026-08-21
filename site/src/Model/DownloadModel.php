@@ -17,6 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Database\ParameterType;
+use GrantHood\Component\DownloadTracker\Administrator\Service\DownloadLogStatus;
 
 class DownloadModel extends BaseDatabaseModel
 {
@@ -134,6 +135,11 @@ class DownloadModel extends BaseDatabaseModel
 		$server = $app->getInput()->server;
 		$db = $this->getDatabase();
 		$userAgent = $server->getString('HTTP_USER_AGENT', '');
+		$botReason = $this->detectBotReason($userAgent);
+		$status = DownloadLogStatus::markTestRequest(
+			$status,
+			$server->getString(DownloadLogStatus::TEST_HEADER, '')
+		);
 		$requestedUrl = $this->redactTokenFromUrl(Uri::getInstance()->toString());
 		$referrer = $this->redactTokenFromUrl($server->getString('HTTP_REFERER', ''));
 
@@ -147,7 +153,8 @@ class DownloadModel extends BaseDatabaseModel
 			'resolved_version' => $item->version,
 			'ip_address' => $server->getString('REMOTE_ADDR', ''),
 			'user_agent' => $userAgent,
-			'is_bot' => $this->isBotUserAgent($userAgent) ? 1 : 0,
+			'is_bot' => $botReason !== null ? 1 : 0,
+			'bot_reason' => $botReason,
 			'referrer' => $referrer,
 			'requested_url' => $requestedUrl,
 			'target_url' => $target ?? (string) $item->target_url,
@@ -179,14 +186,14 @@ class DownloadModel extends BaseDatabaseModel
 		return (string) preg_replace('/([?&]token=)[^&#]*/i', '$1[redacted]', $url);
 	}
 
-	private function isBotUserAgent(string $userAgent): bool
+	private function detectBotReason(string $userAgent): ?string
 	{
 		foreach (['bot', 'crawl', 'spider', 'slurp', 'facebookexternalhit', 'preview', 'headless', 'lighthouse'] as $term) {
 			if (stripos($userAgent, $term) !== false) {
-				return true;
+				return 'user_agent_match';
 			}
 		}
 
-		return false;
+		return null;
 	}
 }

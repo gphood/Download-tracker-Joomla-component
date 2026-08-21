@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS `#__downloadtracker_logs` (
 	`ip_address` varchar(45) NULL,
 	`user_agent` text NULL,
 	`is_bot` tinyint NOT NULL DEFAULT 0,
+	`bot_reason` varchar(100) NULL,
 	`referrer` text NULL,
 	`requested_url` text NULL,
 	`target_url` text NOT NULL,

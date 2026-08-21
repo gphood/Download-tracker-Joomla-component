@@ -41,6 +41,7 @@ class DashboardModel extends BaseDatabaseModel
 			->leftJoin($db->quoteName('#__downloadtracker_items', 'i') . ' ON ' . $db->quoteName('i.id') . ' = ' . $db->quoteName('a.item_id'))
 			->leftJoin($db->quoteName('#__downloadtracker_products', 'p') . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('a.product_id'))
 			->where($db->quoteName('a.is_bot') . ' = 0')
+			->where($this->getSuccessfulStatusCondition('a.status'))
 			->group($db->quoteName(['a.item_id', 'i.title', 'p.title']))
 			->order($db->quoteName('download_count') . ' DESC');
 
@@ -57,6 +58,7 @@ class DashboardModel extends BaseDatabaseModel
 			->select('COUNT(*) AS ' . $db->quoteName('download_count'))
 			->from($db->quoteName('#__downloadtracker_logs', 'a'))
 			->where($db->quoteName('a.is_bot') . ' = 0')
+			->where($this->getSuccessfulStatusCondition('a.status'))
 			->group($db->quoteName(['a.referrer', 'a.requested_url', 'a.requested_alias']))
 			->order($db->quoteName('download_count') . ' DESC');
 
@@ -102,6 +104,7 @@ class DashboardModel extends BaseDatabaseModel
 			->select('COUNT(*) AS ' . $db->quoteName('download_count'))
 			->from($db->quoteName('#__downloadtracker_logs'))
 			->where($db->quoteName('is_bot') . ' = 0')
+			->where($this->getSuccessfulStatusCondition('status'))
 			->where($db->quoteName('downloaded_at') . ' >= :from_date')
 			->group('DATE(' . $db->quoteName('downloaded_at') . ')')
 			->bind(':from_date', $fromDate);
@@ -148,7 +151,8 @@ class DashboardModel extends BaseDatabaseModel
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
 			->select('COUNT(*)')
-			->from($db->quoteName('#__downloadtracker_logs'));
+			->from($db->quoteName('#__downloadtracker_logs'))
+			->where($this->getSuccessfulStatusCondition('status'));
 
 		if (!$includeBots) {
 			$query->where($db->quoteName('is_bot') . ' = 0');
@@ -162,6 +166,13 @@ class DashboardModel extends BaseDatabaseModel
 		$db->setQuery($query);
 
 		return (int) $db->loadResult();
+	}
+
+	private function getSuccessfulStatusCondition(string $column): string
+	{
+		$db = $this->getDatabase();
+
+		return $db->quoteName($column) . ' IN (' . $db->quote('downloaded') . ', ' . $db->quote('redirected') . ')';
 	}
 
 	private function isDownloadRequestReferrer(string $referrer, string $requestedUrl, string $requestedAlias): bool
